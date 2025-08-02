@@ -1,0 +1,179 @@
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+// Configuração base da API
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+// Criar instância do axios
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para adicionar token nas requisições
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para tratar respostas e erros
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token inválido ou expirado
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      toast.error('Sessão expirada. Faça login novamente.');
+    } else if (error.response?.status === 403) {
+      toast.error('Acesso negado.');
+    } else if (error.response?.status >= 500) {
+      toast.error('Erro interno do servidor. Tente novamente.');
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Serviços de autenticação
+export const authService = {
+  login: async (email, senha) => {
+    const response = await api.post('/auth/login', { email, senha });
+    return response;
+  },
+
+  register: async (nome, email, senha) => {
+    const response = await api.post('/auth/registro', { nome, email, senha });
+    return response.data;
+  },
+
+  validateToken: async () => {
+    const response = await api.get('/auth/validar');
+    return response.data;
+  },
+
+  updateProfile: async (data) => {
+    const response = await api.put('/auth/perfil', data);
+    return response.data;
+  },
+
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  }
+};
+
+// Serviços de clientes
+export const clienteService = {
+  listar: async () => {
+    const response = await api.get('/clientes');
+    return response.data;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/clientes/${id}`);
+    return response.data;
+  },
+
+  buscarPorCpfCnpj: async (cpfCnpj) => {
+    const response = await api.get(`/clientes/cpf-cnpj/${cpfCnpj}`);
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post('/clientes', data);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/clientes/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/clientes/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id) => {
+    const response = await api.patch(`/clientes/${id}/toggle-status`);
+    return response.data;
+  },
+
+  relatorio: async (periodo = 30) => {
+    const response = await api.get('/clientes/relatorio/geral', {
+      params: { periodo }
+    });
+    return response.data;
+  }
+};
+
+// Serviços de produtos
+export const produtoService = {
+  listar: async () => {
+    const response = await api.get('/produtos');
+    return response;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/produtos/${id}`);
+    return response.data;
+  },
+
+  buscarPorCodigoBarras: async (codigo) => {
+    const response = await api.get(`/produtos/codigo-barras/${codigo}`);
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post('/produtos', data);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/produtos/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/produtos/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id) => {
+    const response = await api.patch(`/produtos/${id}/toggle-status`);
+    return response.data;
+  },
+
+  listarCategorias: async () => {
+    const response = await api.get('/produtos/categorias/listar');
+    return response.data;
+  },
+
+  estoqueBaixo: async () => {
+    const response = await api.get('/produtos/estoque/baixo');
+    return response.data;
+  },
+
+  relatorio: async (periodo = 30) => {
+    const response = await api.get('/produtos/relatorio/geral', {
+      params: { periodo }
+    });
+    return response.data;
+  }
+};
+
+export default api;
+
