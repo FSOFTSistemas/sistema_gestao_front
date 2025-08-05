@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Users,
   Package,
@@ -8,9 +8,9 @@ import {
   AlertTriangle,
   DollarSign,
   Calendar,
-  Activity
-} from 'lucide-react';
-import { clienteService, produtoService } from '../services/api';
+  Activity,
+} from "lucide-react";
+import { clienteService, produtoService } from "../services/api";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -19,7 +19,7 @@ const Dashboard = () => {
     totalProdutos: 0,
     produtosAtivos: 0,
     produtosEstoqueBaixo: 0,
-    valorEstoque: 0
+    valorEstoque: 0,
   });
   const [loading, setLoading] = useState(true);
   const [recentClients, setRecentClients] = useState([]);
@@ -32,39 +32,41 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Carregar estatísticas de clientes
       const clientesResponse = await clienteService.listar();
       const clientesRelatorio = await clienteService.relatorio(30);
-      
+
       // Carregar estatísticas de produtos
       const produtosResponse = await produtoService.listar();
       const produtosRelatorio = await produtoService.relatorio(30);
       const estoqueBaixo = await produtoService.estoqueBaixo();
-      
+
       setStats({
         totalClientes: clientesRelatorio.data?.estatisticas?.totalClientes || 0,
-        clientesAtivos: clientesRelatorio.data?.estatisticas?.clientesAtivos || 0,
+        clientesAtivos:
+          clientesRelatorio.data?.estatisticas?.clientesAtivos || 0,
         totalProdutos: produtosRelatorio.data?.estatisticas?.totalProdutos || 0,
-        produtosAtivos: produtosRelatorio.data?.estatisticas?.produtosAtivos || 0,
-        produtosEstoqueBaixo: produtosRelatorio.data?.estatisticas?.produtosEstoqueBaixo || 0,
-        valorEstoque: produtosRelatorio.data?.estatisticas?.valorEstoque || 0
+        produtosAtivos:
+          produtosRelatorio.data?.estatisticas?.produtosAtivos || 0,
+        produtosEstoqueBaixo:
+          produtosRelatorio.data?.estatisticas?.produtosEstoqueBaixo || 0,
+        valorEstoque: produtosRelatorio.data?.estatisticas?.valorEstoque || 0,
       });
-      
+
       setRecentClients(clientesResponse.data?.clientes || []);
       setLowStockProducts(estoqueBaixo.data?.produtos || []);
-      
     } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error);
+      console.error("Erro ao carregar dados do dashboard:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -117,13 +119,11 @@ const Dashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">
-            Visão geral do seu negócio
-          </p>
+          <p className="text-gray-600 mt-1">Visão geral do seu negócio</p>
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Calendar className="w-4 h-4" />
-          <span>{new Date().toLocaleDateString('pt-BR')}</span>
+          <span>{new Date().toLocaleDateString("pt-BR")}</span>
         </div>
       </div>
 
@@ -169,7 +169,8 @@ const Dashboard = () => {
                 Atenção: Produtos com estoque baixo
               </h3>
               <p className="text-sm text-yellow-700 mt-1">
-                {stats.produtosEstoqueBaixo} produto(s) estão com estoque abaixo do mínimo.
+                {stats.produtosEstoqueBaixo} produto(s) estão com estoque abaixo
+                do mínimo.
               </p>
             </div>
             <Link
@@ -188,7 +189,9 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Clientes Recentes</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Clientes Recentes
+              </h2>
               <Link
                 to="/clientes"
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium"
@@ -213,12 +216,14 @@ const Dashboard = () => {
                         {cliente.email || cliente.telefone}
                       </p>
                     </div>
-                    <div className={`px-2 py-1 text-xs rounded-full ${
-                      cliente.ativo 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {cliente.ativo ? 'Ativo' : 'Inativo'}
+                    <div
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        cliente.ativo
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {cliente.ativo ? "Ativo" : "Inativo"}
                     </div>
                   </div>
                 ))}
@@ -242,7 +247,9 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Estoque Baixo</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Estoque Baixo
+              </h2>
               <Link
                 to="/produtos?estoque_baixo=true"
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium"
@@ -264,7 +271,8 @@ const Dashboard = () => {
                         {produto.nome}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Estoque: {produto.estoque_atual} / Mín: {produto.estoque_minimo}
+                        Estoque: {produto.estoque_atual} / Mín:{" "}
+                        {produto.estoque_minimo}
                       </p>
                     </div>
                     <div className="text-right">
@@ -278,7 +286,9 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-8">
                 <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500">Todos os produtos estão com estoque adequado</p>
+                <p className="text-gray-500">
+                  Todos os produtos estão com estoque adequado
+                </p>
               </div>
             )}
           </div>
@@ -287,7 +297,9 @@ const Dashboard = () => {
 
       {/* Ações rápidas */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Ações Rápidas
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/clientes"
@@ -296,7 +308,9 @@ const Dashboard = () => {
             <Users className="w-8 h-8 text-orange-500 mr-3" />
             <div>
               <p className="font-medium text-gray-900">Gerenciar Clientes</p>
-              <p className="text-sm text-gray-500">Adicionar ou editar clientes</p>
+              <p className="text-sm text-gray-500">
+                Adicionar ou editar clientes
+              </p>
             </div>
           </Link>
           <Link
@@ -306,7 +320,9 @@ const Dashboard = () => {
             <Package className="w-8 h-8 text-orange-500 mr-3" />
             <div>
               <p className="font-medium text-gray-900">Gerenciar Produtos</p>
-              <p className="text-sm text-gray-500">Adicionar ou editar produtos</p>
+              <p className="text-sm text-gray-500">
+                Adicionar ou editar produtos
+              </p>
             </div>
           </Link>
           <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
@@ -323,4 +339,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

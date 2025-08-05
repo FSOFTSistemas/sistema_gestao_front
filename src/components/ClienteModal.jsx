@@ -1,41 +1,29 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { X, User, Mail, Phone, MapPin, FileText } from 'lucide-react';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { X, User, Mail, Phone, MapPin, FileText } from "lucide-react";
 
 const schema = yup.object({
   nome: yup
     .string()
-    .min(2, 'Nome deve ter pelo menos 2 caracteres')
-    .max(150, 'Nome deve ter no máximo 150 caracteres')
-    .required('Nome é obrigatório'),
-  cpf_cnpj: yup
-    .string()
-    .max(18, 'CPF/CNPJ deve ter no máximo 18 caracteres')
-    .required('CPF/CNPJ é obrigatório'),
-  telefone: yup
-    .string()
-    .max(20, 'Telefone deve ter no máximo 20 caracteres'),
+    .min(2, "Nome deve ter pelo menos 2 caracteres")
+    .max(150, "Nome deve ter no máximo 150 caracteres")
+    .required("Nome é obrigatório"),
+  cpf_cnpj: yup.string().max(18, "CPF/CNPJ deve ter no máximo 18 caracteres"),
+
+  telefone: yup.string().max(20, "Telefone deve ter no máximo 20 caracteres"),
   email: yup
     .string()
-    .email('Email inválido')
-    .max(150, 'Email deve ter no máximo 150 caracteres'),
-  endereco: yup
-    .string()
-    .max(255, 'Endereço deve ter no máximo 255 caracteres'),
-  cidade: yup
-    .string()
-    .max(100, 'Cidade deve ter no máximo 100 caracteres'),
-  estado: yup
-    .string()
-    .length(2, 'Estado deve ter 2 caracteres'),
-  cep: yup
-    .string()
-    .max(10, 'CEP deve ter no máximo 10 caracteres'),
+    .email("Email inválido")
+    .max(150, "Email deve ter no máximo 150 caracteres"),
+  endereco: yup.string().max(255, "Endereço deve ter no máximo 255 caracteres"),
+  cidade: yup.string().max(100, "Cidade deve ter no máximo 100 caracteres"),
+  estado: yup.string(),
+  cep: yup.string().max(10, "CEP deve ter no máximo 10 caracteres"),
   observacoes: yup
     .string()
-    .max(500, 'Observações devem ter no máximo 500 caracteres'),
+    .max(500, "Observações devem ter no máximo 500 caracteres"),
 });
 
 const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
@@ -44,7 +32,7 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -52,8 +40,8 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
   useEffect(() => {
     if (cliente) {
       // Preencher formulário com dados do cliente
-      Object.keys(cliente).forEach(key => {
-        setValue(key, cliente[key] || '');
+      Object.keys(cliente).forEach((key) => {
+        setValue(key, cliente[key] || "");
       });
     } else {
       reset();
@@ -69,13 +57,11 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
-
         <div className="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
-              {cliente ? 'Editar Cliente' : 'Novo Cliente'}
+              {cliente ? "Editar Cliente" : "Novo Cliente"}
             </h3>
             <button
               onClick={onClose}
@@ -97,16 +83,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  {...register('nome')}
+                  {...register("nome")}
                   type="text"
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.nome ? 'border-red-300' : 'border-gray-300'
+                    errors.nome ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Nome completo do cliente"
                 />
               </div>
               {errors.nome && (
-                <p className="mt-1 text-sm text-red-600">{errors.nome.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.nome.message}
+                </p>
               )}
             </div>
 
@@ -121,16 +109,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                     <FileText className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('cpf_cnpj')}
+                    {...register("cpf_cnpj")}
                     type="text"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.cpf_cnpj ? 'border-red-300' : 'border-gray-300'
+                      errors.cpf_cnpj ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="000.000.000-00"
                   />
                 </div>
                 {errors.cpf_cnpj && (
-                  <p className="mt-1 text-sm text-red-600">{errors.cpf_cnpj.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.cpf_cnpj.message}
+                  </p>
                 )}
               </div>
 
@@ -143,16 +133,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                     <Phone className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('telefone')}
+                    {...register("telefone")}
                     type="text"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.telefone ? 'border-red-300' : 'border-gray-300'
+                      errors.telefone ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="(11) 99999-9999"
                   />
                 </div>
                 {errors.telefone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.telefone.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.telefone.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -167,16 +159,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  {...register('email')}
+                  {...register("email")}
                   type="email"
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                    errors.email ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="cliente@email.com"
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -190,16 +184,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   <MapPin className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  {...register('endereco')}
+                  {...register("endereco")}
                   type="text"
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.endereco ? 'border-red-300' : 'border-gray-300'
+                    errors.endereco ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Rua, número, bairro"
                 />
               </div>
               {errors.endereco && (
-                <p className="mt-1 text-sm text-red-600">{errors.endereco.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.endereco.message}
+                </p>
               )}
             </div>
 
@@ -210,15 +206,17 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   Cidade
                 </label>
                 <input
-                  {...register('cidade')}
+                  {...register("cidade")}
                   type="text"
                   className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.cidade ? 'border-red-300' : 'border-gray-300'
+                    errors.cidade ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="São Paulo"
                 />
                 {errors.cidade && (
-                  <p className="mt-1 text-sm text-red-600">{errors.cidade.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.cidade.message}
+                  </p>
                 )}
               </div>
 
@@ -227,16 +225,18 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   Estado
                 </label>
                 <input
-                  {...register('estado')}
+                  {...register("estado")}
                   type="text"
                   maxLength={2}
                   className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.estado ? 'border-red-300' : 'border-gray-300'
+                    errors.estado ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="SP"
                 />
                 {errors.estado && (
-                  <p className="mt-1 text-sm text-red-600">{errors.estado.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.estado.message}
+                  </p>
                 )}
               </div>
 
@@ -245,15 +245,17 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                   CEP
                 </label>
                 <input
-                  {...register('cep')}
+                  {...register("cep")}
                   type="text"
                   className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.cep ? 'border-red-300' : 'border-gray-300'
+                    errors.cep ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="00000-000"
                 />
                 {errors.cep && (
-                  <p className="mt-1 text-sm text-red-600">{errors.cep.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.cep.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -264,15 +266,17 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                 Observações
               </label>
               <textarea
-                {...register('observacoes')}
+                {...register("observacoes")}
                 rows={3}
                 className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors resize-none ${
-                  errors.observacoes ? 'border-red-300' : 'border-gray-300'
+                  errors.observacoes ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Informações adicionais sobre o cliente"
               />
               {errors.observacoes && (
-                <p className="mt-1 text-sm text-red-600">{errors.observacoes.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.observacoes.message}
+                </p>
               )}
             </div>
 
@@ -295,8 +299,10 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Salvando...
                   </div>
+                ) : cliente ? (
+                  "Atualizar"
                 ) : (
-                  cliente ? 'Atualizar' : 'Criar'
+                  "Criar"
                 )}
               </button>
             </div>
@@ -308,4 +314,3 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
 };
 
 export default ClienteModal;
-
