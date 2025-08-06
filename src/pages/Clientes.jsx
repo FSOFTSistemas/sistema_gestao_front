@@ -45,10 +45,16 @@ const Clientes = () => {
         page: currentPage,
         limit: itemsPerPage,
         search: searchTerm || undefined,
-        ativo: filtroAtivo === "todos" ? undefined : filtroAtivo === "ativos",
+        ativo:
+          filtroAtivo === "todos"
+            ? null
+            : filtroAtivo === "ativos"
+            ? true
+            : false,
       };
-
+      console.log("Carregando clientes com parâmetros:", params);
       const response = await clienteService.listar(params);
+      console.log("Clientes carregados:", response);
 
       setClientes(response.clientes || []);
       setTotalPages(response.pagination?.totalPages || 1);
@@ -176,7 +182,7 @@ const Clientes = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-20 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="absolute right-0 z-999 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200">
           <div className="py-1">
             <button
               onClick={() => handleEditCliente(cliente)}
@@ -288,8 +294,8 @@ const Clientes = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 table-auto">
+            <div className="relative min-w-full">
+              <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -309,12 +315,9 @@ const Clientes = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 overflow-visible">
+                <tbody className="bg-white divide-y divide-gray-200 ">
                   {clientes.map((cliente) => (
-                    <tr
-                      key={cliente.id}
-                      className="hover:bg-gray-50 overflow-visible"
-                    >
+                    <tr key={cliente.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
@@ -451,7 +454,12 @@ const Clientes = () => {
                             return (
                               <button
                                 key={pageNum}
-                                onClick={() => setCurrentPage(pageNum)}
+                                onClick={() => {
+                                  setCurrentPage(pageNum);
+                                  console.log(
+                                    `Mudando para a página ${pageNum}`
+                                  );
+                                }}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                   currentPage === pageNum
                                     ? "z-10 bg-orange-50 border-orange-500 text-orange-600"
@@ -496,10 +504,7 @@ const Clientes = () => {
 
       {/* Overlay para fechar dropdown */}
       {dropdownOpen && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setDropdownOpen(null)}
-        />
+        <div className=" inset-0 z-999" onClick={() => setDropdownOpen(null)} />
       )}
     </div>
   );

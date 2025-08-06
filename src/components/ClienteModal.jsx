@@ -41,7 +41,7 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
     if (cliente) {
       // Preencher formulário com dados do cliente
       Object.keys(cliente).forEach((key) => {
-        setValue(key, cliente[key] || "");
+        setValue(key, cliente[key]);
       });
     } else {
       reset();
@@ -49,7 +49,13 @@ const ClienteModal = ({ isOpen, onClose, cliente, onSave, loading }) => {
   }, [cliente, setValue, reset]);
 
   const onSubmit = (data) => {
-    onSave(data);
+    // Remove campos vazios
+    const filteredData = Object.fromEntries(
+      Object.entries(data).filter(
+        ([, value]) => value !== undefined && value !== null && value !== ""
+      )
+    );
+    onSave(filteredData);
   };
 
   if (!isOpen) return null;

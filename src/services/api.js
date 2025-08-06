@@ -1,21 +1,21 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import axios from "axios";
+import toast from "react-hot-toast";
 
 // Configuração base da API
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = "http://localhost:3000/api/v1";
 
 // Criar instância do axios
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Interceptor para adicionar token nas requisições
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,14 +34,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token inválido ou expirado
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-      toast.error('Sessão expirada. Faça login novamente.');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      toast.error("Sessão expirada. Faça login novamente.");
     } else if (error.response?.status === 403) {
-      toast.error('Acesso negado.');
+      toast.error("Acesso negado.");
     } else if (error.response?.status >= 500) {
-      toast.error('Erro interno do servidor. Tente novamente.');
+      toast.error("Erro interno do servidor. Tente novamente.");
     }
     return Promise.reject(error);
   }
@@ -50,35 +50,35 @@ api.interceptors.response.use(
 // Serviços de autenticação
 export const authService = {
   login: async (email, senha) => {
-    const response = await api.post('/auth/login', { email, senha });
+    const response = await api.post("/auth/login", { email, senha });
     return response;
   },
 
   register: async (nome, email, senha) => {
-    const response = await api.post('/auth/registro', { nome, email, senha });
+    const response = await api.post("/auth/registro", { nome, email, senha });
     return response.data;
   },
 
   validateToken: async () => {
-    const response = await api.get('/auth/validar');
+    const response = await api.get("/auth/validar");
     return response.data;
   },
 
   updateProfile: async (data) => {
-    const response = await api.put('/auth/perfil', data);
+    const response = await api.put("/auth/perfil", data);
     return response.data;
   },
 
   logout: async () => {
-    const response = await api.post('/auth/logout');
+    const response = await api.post("/auth/logout");
     return response.data;
-  }
+  },
 };
 
 // Serviços de clientes
 export const clienteService = {
-  listar: async () => {
-    const response = await api.get('/clientes');
+  listar: async (params) => {
+    const response = await api.get("/clientes", { params });
     return response.data;
   },
 
@@ -93,7 +93,7 @@ export const clienteService = {
   },
 
   criar: async (data) => {
-    const response = await api.post('/clientes', data);
+    const response = await api.post("/clientes", data);
     return response.data;
   },
 
@@ -113,17 +113,17 @@ export const clienteService = {
   },
 
   relatorio: async (periodo = 30) => {
-    const response = await api.get('/clientes/relatorio/geral', {
-      params: { periodo }
+    const response = await api.get("/clientes/relatorio/geral", {
+      params: { periodo },
     });
     return response.data;
-  }
+  },
 };
 
 // Serviços de produtos
 export const produtoService = {
   listar: async () => {
-    const response = await api.get('/produtos');
+    const response = await api.get("/produtos");
     return response;
   },
 
@@ -138,7 +138,7 @@ export const produtoService = {
   },
 
   criar: async (data) => {
-    const response = await api.post('/produtos', data);
+    const response = await api.post("/produtos", data);
     return response.data;
   },
 
@@ -158,22 +158,21 @@ export const produtoService = {
   },
 
   listarCategorias: async () => {
-    const response = await api.get('/produtos/categorias/listar');
+    const response = await api.get("/produtos/categorias/listar");
     return response.data;
   },
 
   estoqueBaixo: async () => {
-    const response = await api.get('/produtos/estoque/baixo');
+    const response = await api.get("/produtos/estoque/baixo");
     return response.data;
   },
 
   relatorio: async (periodo = 30) => {
-    const response = await api.get('/produtos/relatorio/geral', {
-      params: { periodo }
+    const response = await api.get("/produtos/relatorio/geral", {
+      params: { periodo },
     });
     return response.data;
-  }
+  },
 };
 
 export default api;
-
