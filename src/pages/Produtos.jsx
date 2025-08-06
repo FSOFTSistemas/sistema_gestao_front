@@ -75,7 +75,7 @@ const Produtos = () => {
       if (response.status === 200) {
         setProdutos(response.data.produtos || []);
         setTotalPages(response.data.pagination?.totalPages || 1);
-        setTotalProdutos(response.data.pagination?.total || 0);
+        setTotalProdutos(response.data.produtos.length);
       }
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
@@ -112,12 +112,10 @@ const Produtos = () => {
       setModalLoading(true);
 
       if (produtoEditando) {
-        console.log("hellou my friend", produtoEditando);
         const response = await produtoService.atualizar(
           produtoEditando.id,
           data
         );
-        console.log("A tal da resposta", response);
         if (response.success) {
           toast.success("Produto atualizado com sucesso!");
           loadProdutos();

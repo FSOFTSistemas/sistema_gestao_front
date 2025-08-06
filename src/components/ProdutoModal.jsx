@@ -33,7 +33,6 @@ const schema = yup.object({
     .string()
     .max(10, "Unidade deve ter no máximo 10 caracteres")
     .required("Unidade é obrigatória"),
-  categoria: yup.string().max(50, "Categoria deve ter no máximo 50 caracteres"),
   estoque_atual: yup
     .number()
     .min(0, "Estoque atual não pode ser negativo")
@@ -83,8 +82,6 @@ const ProdutoModal = ({
   }, [produto, setValue, reset]);
 
   const onSubmit = (data) => {
-    console.log("passando por aqui, aeeeeeeeee");
-
     // Converter strings para números onde necessário
     const formattedData = {
       ...data,
@@ -124,7 +121,12 @@ const ProdutoModal = ({
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit, (err) =>
+              console.log("Erros:", err)
+            )}
+            className="space-y-6"
+          >
             {/* Nome e Código de Barras */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
