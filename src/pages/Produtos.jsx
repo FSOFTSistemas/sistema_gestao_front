@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -14,11 +14,11 @@ import {
   EyeOff,
   ChevronLeft,
   ChevronRight,
-  Tag
-} from 'lucide-react';
-import { produtoService } from '../services/api';
-import ProdutoModal from '../components/ProdutoModal';
-import toast from 'react-hot-toast';
+  Tag,
+} from "lucide-react";
+import { produtoService } from "../services/api";
+import ProdutoModal from "../components/ProdutoModal";
+import toast from "react-hot-toast";
 
 const Produtos = () => {
   const [produtos, setProdutos] = useState([]);
@@ -26,9 +26,10 @@ const Produtos = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filtroAtivo, setFiltroAtivo] = useState('todos');
-  const [filtroCategoria, setFiltroCategoria] = useState('todas');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [filtroAtivo, setFiltroAtivo] = useState("todos");
+  const [filtroCategoria, setFiltroCategoria] = useState("todas");
   const [filtroEstoqueBaixo, setFiltroEstoqueBaixo] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,7 +42,21 @@ const Produtos = () => {
   useEffect(() => {
     loadProdutos();
     loadCategorias();
-  }, [currentPage, searchTerm, filtroAtivo, filtroCategoria, filtroEstoqueBaixo]);
+  }, [
+    currentPage,
+    debouncedSearchTerm,
+    filtroAtivo,
+    filtroCategoria,
+    filtroEstoqueBaixo,
+  ]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms de atraso pra evitar too many requests
+
+    return () => clearTimeout(timeout); // limpa se o usuário digitar antes do tempo
+  }, [searchTerm]);
 
   const loadProdutos = async () => {
     try {
@@ -50,21 +65,21 @@ const Produtos = () => {
         page: currentPage,
         limit: itemsPerPage,
         search: searchTerm || undefined,
-        ativo: filtroAtivo === 'todos' ? undefined : filtroAtivo === 'ativos',
-        categoria: filtroCategoria === 'todas' ? undefined : filtroCategoria,
-        estoque_baixo: filtroEstoqueBaixo || undefined
+        ativo: filtroAtivo === "todos" ? undefined : filtroAtivo === "ativos",
+        categoria: filtroCategoria === "todas" ? undefined : filtroCategoria,
+        estoque_baixo: filtroEstoqueBaixo || undefined,
       };
 
-      const response = await produtoService.listar();
-      
+      const response = await produtoService.listar(params);
+
       if (response.status === 200) {
         setProdutos(response.data.produtos || []);
         setTotalPages(response.data.pagination?.totalPages || 1);
         setTotalProdutos(response.data.pagination?.total || 0);
       }
     } catch (error) {
-      console.error('Erro ao carregar produtos:', error);
-      toast.error('Erro ao carregar produtos');
+      console.error("Erro ao carregar produtos:", error);
+      toast.error("Erro ao carregar produtos");
     } finally {
       setLoading(false);
     }
@@ -77,7 +92,7 @@ const Produtos = () => {
         setCategorias(response.data || []);
       }
     } catch (error) {
-      console.error('Erro ao carregar categorias:', error);
+      console.error("Erro ao carregar categorias:", error);
     }
   };
 
@@ -95,25 +110,30 @@ const Produtos = () => {
   const handleSaveProduto = async (data) => {
     try {
       setModalLoading(true);
-      
+
       if (produtoEditando) {
-        const response = await produtoService.atualizar(produtoEditando.id, data);
+        console.log("hellou my friend", produtoEditando);
+        const response = await produtoService.atualizar(
+          produtoEditando.id,
+          data
+        );
+        console.log("A tal da resposta", response);
         if (response.success) {
-          toast.success('Produto atualizado com sucesso!');
+          toast.success("Produto atualizado com sucesso!");
           loadProdutos();
           setModalOpen(false);
         }
       } else {
         const response = await produtoService.criar(data);
         if (response.success) {
-          toast.success('Produto criado com sucesso!');
+          toast.success("Produto criado com sucesso!");
           loadProdutos();
           setModalOpen(false);
         }
       }
     } catch (error) {
-      console.error('Erro ao salvar produto:', error);
-      const message = error.response?.data?.message || 'Erro ao salvar produto';
+      console.error("Erro ao salvar produto:", error);
+      const message = error.response?.data?.message || "Erro ao salvar produto";
       toast.error(message);
     } finally {
       setModalLoading(false);
@@ -121,16 +141,21 @@ const Produtos = () => {
   };
 
   const handleDeleteProduto = async (produto) => {
-    if (window.confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
+    if (
+      window.confirm(
+        `Tem certeza que deseja excluir o produto "${produto.nome}"?`
+      )
+    ) {
       try {
         const response = await produtoService.deletar(produto.id);
         if (response.success) {
-          toast.success('Produto excluído com sucesso!');
+          toast.success("Produto excluído com sucesso!");
           loadProdutos();
         }
       } catch (error) {
-        console.error('Erro ao excluir produto:', error);
-        const message = error.response?.data?.message || 'Erro ao excluir produto';
+        console.error("Erro ao excluir produto:", error);
+        const message =
+          error.response?.data?.message || "Erro ao excluir produto";
         toast.error(message);
       }
     }
@@ -141,12 +166,14 @@ const Produtos = () => {
     try {
       const response = await produtoService.toggleStatus(produto.id);
       if (response.success) {
-        toast.success(`Produto ${produto.ativo ? 'desativado' : 'ativado'} com sucesso!`);
+        toast.success(
+          `Produto ${produto.ativo ? "desativado" : "ativado"} com sucesso!`
+        );
         loadProdutos();
       }
     } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      toast.error('Erro ao alterar status do produto');
+      console.error("Erro ao alterar status:", error);
+      toast.error("Erro ao alterar status do produto");
     }
     setDropdownOpen(null);
   };
@@ -157,20 +184,20 @@ const Produtos = () => {
   };
 
   const handleFilterChange = (filtro, value) => {
-    if (filtro === 'ativo') {
+    if (filtro === "ativo") {
       setFiltroAtivo(value);
-    } else if (filtro === 'categoria') {
+    } else if (filtro === "categoria") {
       setFiltroCategoria(value);
-    } else if (filtro === 'estoque_baixo') {
+    } else if (filtro === "estoque_baixo") {
       setFiltroEstoqueBaixo(value);
     }
     setCurrentPage(1);
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -178,22 +205,18 @@ const Produtos = () => {
     if (custo > 0) {
       return (((precoVenda - custo) / custo) * 100).toFixed(1);
     }
-    return '0.0';
-  };
-
-  const isEstoqueBaixo = (produto) => {
-    return produto.estoque_atual <= produto.estoque_minimo;
+    return "0.0";
   };
 
   const DropdownMenu = ({ produto, isOpen, onToggle }) => (
-    <div className="relative">
+    <div className="relative inline-block text-left">
       <button
         onClick={onToggle}
         className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
       >
         <MoreVertical className="w-4 h-4" />
       </button>
-      
+
       {isOpen && (
         <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
           <div className="py-1">
@@ -277,7 +300,7 @@ const Produtos = () => {
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={filtroAtivo}
-                onChange={(e) => handleFilterChange('ativo', e.target.value)}
+                onChange={(e) => handleFilterChange("ativo", e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
@@ -288,13 +311,13 @@ const Produtos = () => {
 
             <select
               value={filtroCategoria}
-              onChange={(e) => handleFilterChange('categoria', e.target.value)}
+              onChange={(e) => handleFilterChange("categoria", e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
               <option value="todas">Todas as categorias</option>
               {categorias.map((categoria) => (
-                <option key={categoria.categoria} value={categoria.categoria}>
-                  {categoria.categoria} ({categoria.total_produtos})
+                <option key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
                 </option>
               ))}
             </select>
@@ -303,7 +326,9 @@ const Produtos = () => {
               <input
                 type="checkbox"
                 checked={filtroEstoqueBaixo}
-                onChange={(e) => handleFilterChange('estoque_baixo', e.target.checked)}
+                onChange={(e) =>
+                  handleFilterChange("estoque_baixo", e.target.checked)
+                }
                 className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
               <span className="text-sm text-gray-700">Estoque baixo</span>
@@ -313,7 +338,7 @@ const Produtos = () => {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 ">
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -332,120 +357,129 @@ const Produtos = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Produto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Preços
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estoque
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Categoria
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {produtos.map((produto) => (
-                    <tr key={produto.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                            <Package className="w-5 h-5 text-orange-600" />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {produto.nome}
-                            </div>
-                            {produto.codigo_barras && (
-                              <div className="flex items-center text-sm text-gray-500">
-                                <Barcode className="w-3 h-3 mr-1" />
-                                {produto.codigo_barras}
-                              </div>
-                            )}
-                          </div>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Produto
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Preços
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estoque
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Categoria
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {produtos.map((produto) => (
+                  <tr key={produto.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                          <Package className="w-5 h-5 text-orange-600" />
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-1">
+                        <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {formatCurrency(produto.preco_venda)}
+                            {produto.nome}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            Custo: {formatCurrency(produto.custo)}
-                          </div>
-                          <div className="text-xs text-green-600">
-                            Margem: {calcularMargem(produto.preco_venda, produto.custo)}%
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-1">
-                          <div className={`text-sm font-medium ${
-                            isEstoqueBaixo(produto) ? 'text-red-600' : 'text-gray-900'
-                          }`}>
-                            {produto.estoque_atual} {produto.unidade}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Mín: {produto.estoque_minimo} {produto.unidade}
-                          </div>
-                          {isEstoqueBaixo(produto) && (
-                            <div className="flex items-center text-xs text-red-600">
-                              <AlertTriangle className="w-3 h-3 mr-1" />
-                              Estoque baixo
+                          {produto.codigo_barras && (
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Barcode className="w-3 h-3 mr-1" />
+                              {produto.codigo_barras}
                             </div>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {produto.categoria ? (
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Tag className="w-4 h-4 mr-2" />
-                            {produto.categoria}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-gray-900">
+                          {formatCurrency(produto.preco_venda)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Custo: {formatCurrency(produto.custo)}
+                        </div>
+                        <div className="text-xs text-green-600">
+                          Margem:{" "}
+                          {calcularMargem(produto.preco_venda, produto.custo)}%
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <div
+                          className={`text-sm font-medium ${
+                            produto.estoque_baixo === true
+                              ? "text-red-600"
+                              : "text-gray-900"
+                          }`}
+                        >
+                          {produto.estoque_atual} {produto.unidade}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Mín: {produto.estoque_minimo} {produto.unidade}
+                        </div>
+                        {produto.estoque_baixo === true && (
+                          <div className="flex items-center text-xs text-red-600">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Estoque baixo
                           </div>
-                        ) : (
-                          <span className="text-sm text-gray-400">-</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-1">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            produto.ativo
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {produto.ativo ? 'Ativo' : 'Inativo'}
-                          </span>
-                          {isEstoqueBaixo(produto) && (
-                            <div className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                              Estoque baixo
-                            </div>
-                          )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {produto.categoria ? (
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Tag className="w-4 h-4 mr-2" />
+                          {produto.categoria.nome}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <DropdownMenu
-                          produto={produto}
-                          isOpen={dropdownOpen === produto.id}
-                          onToggle={() => setDropdownOpen(dropdownOpen === produto.id ? null : produto.id)}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            produto.ativo
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {produto.ativo ? "Ativo" : "Inativo"}
+                        </span>
+                        {produto.estoque_baixo === true && (
+                          <div className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                            Estoque baixo
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <DropdownMenu
+                        produto={produto}
+                        isOpen={dropdownOpen === produto.id}
+                        onToggle={() =>
+                          setDropdownOpen(
+                            dropdownOpen === produto.id ? null : produto.id
+                          )
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
             {/* Paginação */}
             {totalPages > 1 && (
@@ -453,14 +487,18 @@ const Produtos = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
                       disabled={currentPage === 1}
                       className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Anterior
                     </button>
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.min(totalPages, currentPage + 1))
+                      }
                       disabled={currentPage === totalPages}
                       className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -470,47 +508,61 @@ const Produtos = () => {
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm text-gray-700">
-                        Mostrando{' '}
-                        <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
-                        {' '}até{' '}
+                        Mostrando{" "}
+                        <span className="font-medium">
+                          {(currentPage - 1) * itemsPerPage + 1}
+                        </span>{" "}
+                        até{" "}
                         <span className="font-medium">
                           {Math.min(currentPage * itemsPerPage, totalProdutos)}
-                        </span>
-                        {' '}de{' '}
-                        <span className="font-medium">{totalProdutos}</span>
-                        {' '}resultados
+                        </span>{" "}
+                        de <span className="font-medium">{totalProdutos}</span>{" "}
+                        resultados
                       </p>
                     </div>
                     <div>
                       <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                         <button
-                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          onClick={() =>
+                            setCurrentPage(Math.max(1, currentPage - 1))
+                          }
                           disabled={currentPage === 1}
                           className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <ChevronLeft className="h-5 w-5" />
                         </button>
-                        
+
                         {/* Números das páginas */}
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                                currentPage === pageNum
-                                  ? 'z-10 bg-orange-50 border-orange-500 text-orange-600'
-                                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                              }`}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                        
+                        {Array.from(
+                          { length: Math.min(5, totalPages) },
+                          (_, i) => {
+                            const pageNum =
+                              Math.max(
+                                1,
+                                Math.min(totalPages - 4, currentPage - 2)
+                              ) + i;
+                            return (
+                              <button
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                  currentPage === pageNum
+                                    ? "z-10 bg-orange-50 border-orange-500 text-orange-600"
+                                    : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          }
+                        )}
+
                         <button
-                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          onClick={() =>
+                            setCurrentPage(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
                           disabled={currentPage === totalPages}
                           className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -533,18 +585,15 @@ const Produtos = () => {
         produto={produtoEditando}
         onSave={handleSaveProduto}
         loading={modalLoading}
+        categorias={categorias}
       />
 
       {/* Overlay para fechar dropdown */}
       {dropdownOpen && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setDropdownOpen(null)}
-        />
+        <div className=" inset-0 z-999" onClick={() => setDropdownOpen(null)} />
       )}
     </div>
   );
 };
 
 export default Produtos;
-

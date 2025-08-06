@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
   Home,
   Users,
@@ -13,8 +13,12 @@ import {
   LogOut,
   Menu,
   X,
-  User
-} from 'lucide-react';
+  User,
+  UserSquareIcon,
+  User2,
+  UserCog,
+  Building,
+} from "lucide-react";
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,23 +27,24 @@ const Layout = () => {
   const navigate = useNavigate();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Clientes', href: '/clientes', icon: Users },
-    { name: 'Produtos', href: '/produtos', icon: Package },
-    { name: 'Vendas', href: '/vendas', icon: ShoppingCart },
-    { name: 'Estoque', href: '/estoque', icon: FileText },
-    { name: 'Financeiro', href: '/financeiro', icon: CreditCard },
-    { name: 'Relatórios', href: '/relatorios', icon: BarChart3 },
+    { name: "Dashboard", href: "/", icon: Home },
+    { name: "Clientes", href: "/clientes", icon: Users },
+    { name: "Produtos", href: "/produtos", icon: Package },
+    { name: "Vendas", href: "/vendas", icon: ShoppingCart },
+    { name: "Estoque", href: "/estoque", icon: FileText },
+    { name: "Financeiro", href: "/financeiro", icon: CreditCard },
+    { name: "empresas", href: "/empresas", icon: Building },
+    { name: "usuarios", href: "/usuarios", icon: UserCog },
   ];
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const isActive = (href) => {
-    if (href === '/') {
-      return location.pathname === '/';
+    if (href === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(href);
   };
@@ -47,15 +52,24 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar para mobile */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+      <div
+        className={`fixed inset-0 z-50 lg:hidden ${
+          sidebarOpen ? "block" : "hidden"
+        }`}
+      >
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-75"
+          onClick={() => setSidebarOpen(false)}
+        />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
           <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Sistema Gestão</span>
+              <span className="text-xl font-bold text-gray-900">
+                Sistema Gestão
+              </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -74,8 +88,8 @@ const Layout = () => {
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isActive(item.href)
-                      ? 'bg-orange-100 text-orange-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? "bg-orange-100 text-orange-700"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />
@@ -95,27 +109,40 @@ const Layout = () => {
               <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Sistema Gestão</span>
+              <span className="text-xl font-bold text-gray-900">
+                Sistema Gestão
+              </span>
             </div>
           </div>
           <nav className="flex-1 px-4 py-4 space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-orange-100 text-orange-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {item.name}
-                </Link>
-              );
-            })}
+            {navigation
+              .filter((item) => {
+                // Oculta "empresas" e "usuarios" para quem não é admin (id !== 1)
+                if (
+                  (item.name === "empresas" || item.name === "usuarios") &&
+                  user?.id !== 1
+                ) {
+                  return false;
+                }
+                return true;
+              })
+              .map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isActive(item.href)
+                        ? "bg-orange-100 text-orange-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mr-3" />
+                    {item.name}
+                  </Link>
+                );
+              })}
           </nav>
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
@@ -126,9 +153,7 @@ const Layout = () => {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.nome}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -153,7 +178,7 @@ const Layout = () => {
             >
               <Menu className="w-6 h-6" />
             </button>
-            
+
             <div className="flex items-center space-x-4 ml-auto">
               <div className="hidden sm:flex items-center space-x-3">
                 <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
@@ -163,9 +188,7 @@ const Layout = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {user?.nome}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {user?.email}
-                  </span>
+                  <span className="text-xs text-gray-500">{user?.email}</span>
                 </div>
               </div>
               <button
@@ -189,4 +212,3 @@ const Layout = () => {
 };
 
 export default Layout;
-

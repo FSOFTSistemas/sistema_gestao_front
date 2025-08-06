@@ -122,8 +122,8 @@ export const clienteService = {
 
 // Serviços de produtos
 export const produtoService = {
-  listar: async () => {
-    const response = await api.get("/produtos");
+  listar: async (params) => {
+    const response = await api.get("/produtos", { params });
     return response;
   },
 
@@ -158,7 +158,7 @@ export const produtoService = {
   },
 
   listarCategorias: async () => {
-    const response = await api.get("/produtos/categorias/listar");
+    const response = await api.get("/categorias");
     return response.data;
   },
 

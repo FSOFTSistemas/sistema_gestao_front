@@ -1,72 +1,81 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { X, Package, Barcode, DollarSign, Hash, Tag, FileText } from 'lucide-react';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import {
+  X,
+  Package,
+  Barcode,
+  DollarSign,
+  Hash,
+  Tag,
+  FileText,
+} from "lucide-react";
 
 const schema = yup.object({
   nome: yup
     .string()
-    .min(2, 'Nome deve ter pelo menos 2 caracteres')
-    .max(150, 'Nome deve ter no máximo 150 caracteres')
-    .required('Nome é obrigatório'),
+    .min(2, "Nome deve ter pelo menos 2 caracteres")
+    .max(150, "Nome deve ter no máximo 150 caracteres")
+    .required("Nome é obrigatório"),
   codigo_barras: yup
     .string()
-    .max(50, 'Código de barras deve ter no máximo 50 caracteres'),
+    .max(50, "Código de barras deve ter no máximo 50 caracteres"),
   preco_venda: yup
     .number()
-    .positive('Preço de venda deve ser positivo')
-    .required('Preço de venda é obrigatório'),
+    .positive("Preço de venda deve ser positivo")
+    .required("Preço de venda é obrigatório"),
   custo: yup
     .number()
-    .positive('Custo deve ser positivo')
-    .required('Custo é obrigatório'),
+    .positive("Custo deve ser positivo")
+    .required("Custo é obrigatório"),
   unidade: yup
     .string()
-    .max(10, 'Unidade deve ter no máximo 10 caracteres')
-    .required('Unidade é obrigatória'),
-  categoria: yup
-    .string()
-    .max(50, 'Categoria deve ter no máximo 50 caracteres'),
+    .max(10, "Unidade deve ter no máximo 10 caracteres")
+    .required("Unidade é obrigatória"),
+  categoria: yup.string().max(50, "Categoria deve ter no máximo 50 caracteres"),
   estoque_atual: yup
     .number()
-    .min(0, 'Estoque atual não pode ser negativo')
-    .required('Estoque atual é obrigatório'),
+    .min(0, "Estoque atual não pode ser negativo")
+    .required("Estoque atual é obrigatório"),
   estoque_minimo: yup
     .number()
-    .min(0, 'Estoque mínimo não pode ser negativo')
-    .required('Estoque mínimo é obrigatório'),
+    .min(0, "Estoque mínimo não pode ser negativo")
+    .required("Estoque mínimo é obrigatório"),
   descricao: yup
     .string()
-    .max(500, 'Descrição deve ter no máximo 500 caracteres'),
-  ncm: yup
-    .string()
-    .max(10, 'NCM deve ter no máximo 10 caracteres'),
-  cfop: yup
-    .string()
-    .max(4, 'CFOP deve ter no máximo 4 caracteres'),
+    .max(500, "Descrição deve ter no máximo 500 caracteres"),
+  ncm: yup.string().max(10, "NCM deve ter no máximo 10 caracteres"),
+  cfop: yup.string().max(4, "CFOP deve ter no máximo 4 caracteres"),
 });
 
-const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
+const ProdutoModal = ({
+  isOpen,
+  onClose,
+  produto,
+  onSave,
+  loading,
+  categorias,
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const precoVenda = watch('preco_venda');
-  const custo = watch('custo');
+  const precoVenda = watch("preco_venda");
+  const custo = watch("custo");
 
   useEffect(() => {
     if (produto) {
       // Preencher formulário com dados do produto
-      Object.keys(produto).forEach(key => {
-        setValue(key, produto[key] || '');
+      Object.keys(produto).forEach((key) => {
+        setValue(key, produto[key] || "");
       });
     } else {
       reset();
@@ -74,6 +83,8 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
   }, [produto, setValue, reset]);
 
   const onSubmit = (data) => {
+    console.log("passando por aqui, aeeeeeeeee");
+
     // Converter strings para números onde necessário
     const formattedData = {
       ...data,
@@ -90,7 +101,7 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
       const margem = ((precoVenda - custo) / custo) * 100;
       return margem.toFixed(1);
     }
-    return '0.0';
+    return "0.0";
   };
 
   if (!isOpen) return null;
@@ -98,13 +109,11 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
-
         <div className="inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
-              {produto ? 'Editar Produto' : 'Novo Produto'}
+              {produto ? "Editar Produto" : "Novo Produto"}
             </h3>
             <button
               onClick={onClose}
@@ -127,16 +136,18 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <Package className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('nome')}
+                    {...register("nome")}
                     type="text"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.nome ? 'border-red-300' : 'border-gray-300'
+                      errors.nome ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="Nome do produto"
                   />
                 </div>
                 {errors.nome && (
-                  <p className="mt-1 text-sm text-red-600">{errors.nome.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.nome.message}
+                  </p>
                 )}
               </div>
 
@@ -149,16 +160,20 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <Barcode className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('codigo_barras')}
+                    {...register("codigo_barras")}
                     type="text"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.codigo_barras ? 'border-red-300' : 'border-gray-300'
+                      errors.codigo_barras
+                        ? "border-red-300"
+                        : "border-gray-300"
                     }`}
                     placeholder="7891234567890"
                   />
                 </div>
                 {errors.codigo_barras && (
-                  <p className="mt-1 text-sm text-red-600">{errors.codigo_barras.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.codigo_barras.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -174,18 +189,20 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <DollarSign className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('custo')}
+                    {...register("custo")}
                     type="number"
                     step="0.01"
                     min="0"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.custo ? 'border-red-300' : 'border-gray-300'
+                      errors.custo ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="0.00"
                   />
                 </div>
                 {errors.custo && (
-                  <p className="mt-1 text-sm text-red-600">{errors.custo.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.custo.message}
+                  </p>
                 )}
               </div>
 
@@ -198,18 +215,20 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <DollarSign className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('preco_venda')}
+                    {...register("preco_venda")}
                     type="number"
                     step="0.01"
                     min="0"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.preco_venda ? 'border-red-300' : 'border-gray-300'
+                      errors.preco_venda ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="0.00"
                   />
                 </div>
                 {errors.preco_venda && (
-                  <p className="mt-1 text-sm text-red-600">{errors.preco_venda.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.preco_venda.message}
+                  </p>
                 )}
               </div>
 
@@ -232,9 +251,9 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                   Unidade *
                 </label>
                 <select
-                  {...register('unidade')}
+                  {...register("unidade")}
                   className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.unidade ? 'border-red-300' : 'border-gray-300'
+                    errors.unidade ? "border-red-300" : "border-gray-300"
                   }`}
                 >
                   <option value="">Selecione a unidade</option>
@@ -250,7 +269,9 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                   <option value="PAR">Par (PAR)</option>
                 </select>
                 {errors.unidade && (
-                  <p className="mt-1 text-sm text-red-600">{errors.unidade.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.unidade.message}
+                  </p>
                 )}
               </div>
 
@@ -262,17 +283,24 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Tag className="h-5 w-5 text-gray-400" />
                   </div>
-                  <input
-                    {...register('categoria')}
-                    type="text"
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.categoria ? 'border-red-300' : 'border-gray-300'
+                  <select
+                    {...register("categoria_id")}
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
+                      errors.categoria_id ? "border-red-300" : "border-gray-300"
                     }`}
-                    placeholder="Ex: Roupas, Eletrônicos, Alimentação"
-                  />
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categorias.map((categoria) => (
+                      <option key={categoria.id} value={categoria.id}>
+                        {categoria.nome}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                {errors.categoria && (
-                  <p className="mt-1 text-sm text-red-600">{errors.categoria.message}</p>
+                {errors.categoria_id && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.categoria_id.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -288,17 +316,21 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <Hash className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('estoque_atual')}
+                    {...register("estoque_atual")}
                     type="number"
                     min="0"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.estoque_atual ? 'border-red-300' : 'border-gray-300'
+                      errors.estoque_atual
+                        ? "border-red-300"
+                        : "border-gray-300"
                     }`}
                     placeholder="0"
                   />
                 </div>
                 {errors.estoque_atual && (
-                  <p className="mt-1 text-sm text-red-600">{errors.estoque_atual.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.estoque_atual.message}
+                  </p>
                 )}
               </div>
 
@@ -311,17 +343,21 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <Hash className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    {...register('estoque_minimo')}
+                    {...register("estoque_minimo")}
                     type="number"
                     min="0"
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                      errors.estoque_minimo ? 'border-red-300' : 'border-gray-300'
+                      errors.estoque_minimo
+                        ? "border-red-300"
+                        : "border-gray-300"
                     }`}
                     placeholder="0"
                   />
                 </div>
                 {errors.estoque_minimo && (
-                  <p className="mt-1 text-sm text-red-600">{errors.estoque_minimo.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.estoque_minimo.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -332,21 +368,25 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                 Descrição
               </label>
               <textarea
-                {...register('descricao')}
+                {...register("descricao")}
                 rows={3}
                 className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors resize-none ${
-                  errors.descricao ? 'border-red-300' : 'border-gray-300'
+                  errors.descricao ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Descrição detalhada do produto"
               />
               {errors.descricao && (
-                <p className="mt-1 text-sm text-red-600">{errors.descricao.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.descricao.message}
+                </p>
               )}
             </div>
 
             {/* Informações Fiscais */}
             <div className="border-t border-gray-200 pt-6">
-              <h4 className="text-sm font-medium text-gray-900 mb-4">Informações Fiscais (Opcional)</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-4">
+                Informações Fiscais (Opcional)
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -357,16 +397,18 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                       <FileText className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
-                      {...register('ncm')}
+                      {...register("ncm")}
                       type="text"
                       className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                        errors.ncm ? 'border-red-300' : 'border-gray-300'
+                        errors.ncm ? "border-red-300" : "border-gray-300"
                       }`}
                       placeholder="12345678"
                     />
                   </div>
                   {errors.ncm && (
-                    <p className="mt-1 text-sm text-red-600">{errors.ncm.message}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.ncm.message}
+                    </p>
                   )}
                 </div>
 
@@ -379,16 +421,18 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                       <FileText className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
-                      {...register('cfop')}
+                      {...register("cfop")}
                       type="text"
                       className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                        errors.cfop ? 'border-red-300' : 'border-gray-300'
+                        errors.cfop ? "border-red-300" : "border-gray-300"
                       }`}
                       placeholder="5102"
                     />
                   </div>
                   {errors.cfop && (
-                    <p className="mt-1 text-sm text-red-600">{errors.cfop.message}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.cfop.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -413,8 +457,10 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Salvando...
                   </div>
+                ) : produto ? (
+                  "Atualizar"
                 ) : (
-                  produto ? 'Atualizar' : 'Criar'
+                  "Criar"
                 )}
               </button>
             </div>
@@ -426,4 +472,3 @@ const ProdutoModal = ({ isOpen, onClose, produto, onSave, loading }) => {
 };
 
 export default ProdutoModal;
-
