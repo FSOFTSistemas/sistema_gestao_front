@@ -36,6 +36,11 @@ const Dashboard = () => {
       // Carregar estatísticas de clientes
       const clientesResponse = await clienteService.listar();
       const clientesRelatorio = await clienteService.relatorio(30);
+      console.log("Clientes Relatório:", clientesRelatorio);
+      console.log(
+        "Clientes Relatorio Estatísticas:",
+        clientesRelatorio.estatisticas
+      );
 
       // Carregar estatísticas de produtos
       const produtosResponse = await produtoService.listar();
@@ -43,19 +48,17 @@ const Dashboard = () => {
       const estoqueBaixo = await produtoService.estoqueBaixo();
 
       setStats({
-        totalClientes: clientesRelatorio.data?.estatisticas?.totalClientes || 0,
-        clientesAtivos:
-          clientesRelatorio.data?.estatisticas?.clientesAtivos || 0,
-        totalProdutos: produtosRelatorio.data?.estatisticas?.totalProdutos || 0,
-        produtosAtivos:
-          produtosRelatorio.data?.estatisticas?.produtosAtivos || 0,
+        totalClientes: clientesRelatorio.estatisticas?.totalClientes || 0,
+        clientesAtivos: clientesRelatorio.estatisticas?.clientesAtivos || 0,
+        totalProdutos: produtosRelatorio.estatisticas?.totalProdutos || 0,
+        produtosAtivos: produtosRelatorio.estatisticas?.produtosAtivos || 0,
         produtosEstoqueBaixo:
-          produtosRelatorio.data?.estatisticas?.produtosEstoqueBaixo || 0,
-        valorEstoque: produtosRelatorio.data?.estatisticas?.valorEstoque || 0,
+          produtosRelatorio.estatisticas?.produtosEstoqueBaixo || 0,
+        valorEstoque: produtosRelatorio.estatisticas?.valorEstoque || 0,
       });
 
-      setRecentClients(clientesResponse.data?.clientes || []);
-      setLowStockProducts(estoqueBaixo.data?.produtos || []);
+      setRecentClients(clientesResponse.clientes || []);
+      setLowStockProducts(estoqueBaixo.produtos || []);
     } catch (error) {
       console.error("Erro ao carregar dados do dashboard:", error);
     } finally {
