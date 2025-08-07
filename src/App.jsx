@@ -13,6 +13,9 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Produtos from "./pages/Produtos";
+import Vendas from "./pages/Vendas";
+import Usuarios from "./pages/Usuarios";
+import Empresas from "./pages/Empresas";
 import "./App.css";
 
 function App() {
@@ -62,6 +65,9 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="clientes" element={<Clientes />} />
               <Route path="produtos" element={<Produtos />} />
+              <Route path="vendas" element={<Vendas />} />
+              <Route path="usuarios" element={<Usuarios />} />
+              <Route path="empresas" element={<Empresas />} />
 
               {/* Rotas em desenvolvimento */}
               <Route

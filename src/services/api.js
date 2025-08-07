@@ -175,4 +175,103 @@ export const produtoService = {
   },
 };
 
+// Serviços de vendas
+export const vendaService = {
+  listar: async (params) => {
+    const response = await api.get("/vendas", { params });
+    return response.data;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/vendas/${id}`);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/vendas/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/vendas/${id}`);
+    return response.data;
+  },
+
+  buscarComFiltros: async (params) => {
+    const response = await api.get("/vendas/filtros", { params });
+    return response.data;
+  },
+
+  resumoPorFormaPagamento: async () => {
+    const response = await api.get("/vendas/resumo/forma-pagamento");
+    return response.data;
+  },
+};
+
+// Serviços de usuários
+export const usuarioService = {
+  listar: async (params) => {
+    const response = await api.get("/usuarios", { params });
+    return response.data;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/usuarios/${id}`);
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post("/usuarios", data);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/usuarios/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/usuarios/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id) => {
+    const response = await api.patch(`/usuarios/${id}/toggle-status`);
+    return response.data;
+  },
+};
+
+// Serviços de empresas
+export const empresaService = {
+  listar: async (params) => {
+    const response = await api.get("/empresas", { params });
+    return response.data;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/empresas/${id}`);
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post("/empresas", data);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/empresas/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/empresas/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id) => {
+    const response = await api.patch(`/empresas/${id}/toggle-status`);
+    return response.data;
+  },
+};
+
 export default api;
