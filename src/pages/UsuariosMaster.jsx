@@ -15,11 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { usuarioService } from "../services/api";
-import UsuarioModal from "../components/UsuarioModal";
+import { empresaService, usuarioMasterService } from "../services/api";
+import UsuarioMasterModal from "../components/UsuarioMasterModal";
 import toast from "react-hot-toast";
 
-const Usuarios = () => {
+const UsuariosMaster = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,11 +32,13 @@ const Usuarios = () => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
+  const [empresas, setEmpresas] = useState([]);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     loadUsuarios();
+    loadEmpresas();
   }, [currentPage, debouncedSearchTerm]);
 
   useEffect(() => {
@@ -62,7 +64,7 @@ const Usuarios = () => {
             : false,
       };
       console.log("Carregando usuarios com parâmetros:", params);
-      const usuarioResponse = await usuarioService.listar(params);
+      const usuarioResponse = await usuarioMasterService.listar(params);
       console.log("Resposta do serviço de usuarios:", usuarioResponse.usuarios);
       const response = usuarioResponse.usuarios;
       console.log("Usuarios carregados:", response);
@@ -73,6 +75,20 @@ const Usuarios = () => {
     } catch (error) {
       console.error("Erro ao carregar usuarios:", error);
       toast.error("Erro ao carregar usuarios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEmpresas = async () => {
+    try {
+      setLoading(true);
+      const response = await empresaService.listar();
+      console.log("Empresas carregadas:", response.dados);
+      setEmpresas(response.dados || []);
+    } catch (error) {
+      console.error("Erro ao carregar empresas:", error);
+      toast.error("Erro ao carregar empresas");
     } finally {
       setLoading(false);
     }
@@ -95,7 +111,7 @@ const Usuarios = () => {
 
       if (usuarioEditando) {
         console.log("Atualizando usuario:", usuarioEditando.id, data);
-        const response = await usuarioService.atualizar(
+        const response = await usuarioMasterService.atualizar(
           usuarioEditando.id,
           data
         );
@@ -105,7 +121,7 @@ const Usuarios = () => {
           setModalOpen(false);
         }
       } else {
-        const response = await usuarioService.criar(data);
+        const response = await usuarioMasterService.criar(data);
         if (response.success) {
           toast.success("Usuario criado com sucesso!");
           loadUsuarios();
@@ -121,9 +137,31 @@ const Usuarios = () => {
     }
   };
 
+  const handleDeleteUsuario = async (usuario) => {
+    if (
+      window.confirm(
+        `Tem certeza que deseja excluir o usuario "${usuario.nome}"?`
+      )
+    ) {
+      try {
+        const response = await usuarioMasterService.deletar(usuario.id);
+        if (response.success) {
+          toast.success("Usuario excluído com sucesso!");
+          loadUsuarios();
+        }
+      } catch (error) {
+        console.error("Erro ao excluir usuario:", error);
+        const message =
+          error.response?.data?.message || "Erro ao excluir usuario";
+        toast.error(message);
+      }
+    }
+    setDropdownOpen(null);
+  };
+
   const handleToggleStatus = async (usuario) => {
     try {
-      const response = await usuarioService.toggleStatus(usuario.id);
+      const response = await usuarioMasterService.toggleStatus(usuario.id);
       if (response.success) {
         toast.success(
           `Usuário ${usuario.ativo ? "desativado" : "ativado"} com sucesso!`
@@ -182,6 +220,13 @@ const Usuarios = () => {
                 </>
               )}
             </button>
+            <button
+              onClick={() => handleDeleteUsuario(usuario)}
+              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir
+            </button>
           </div>
         </div>
       )}
@@ -192,7 +237,9 @@ const Usuarios = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Usuários (Master)
+          </h1>
           <p className="text-gray-600 mt-1">
             Gerencie seus usuarios ({totalUsuarios} total)
           </p>
@@ -435,12 +482,13 @@ const Usuarios = () => {
       </div>
 
       {/* Modal */}
-      <UsuarioModal
+      <UsuarioMasterModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         usuario={usuarioEditando}
         onSave={handleSaveUsuario}
         loading={modalLoading}
+        empresas={empresas}
       />
 
       {/* Overlay para fechar dropdown */}
@@ -451,4 +499,4 @@ const Usuarios = () => {
   );
 };
 
-export default Usuarios;
+export default UsuariosMaster;

@@ -18,6 +18,7 @@ import Usuarios from "./pages/Usuarios";
 import Empresas from "./pages/Empresas";
 import Caixas from "./pages/Caixas";
 import "./App.css";
+import UsuariosMaster from "./pages/UsuariosMaster";
 
 function App() {
   return (
@@ -67,6 +68,8 @@ function App() {
               <Route path="clientes" element={<Clientes />} />
               <Route path="produtos" element={<Produtos />} />
               <Route path="vendas" element={<Vendas />} />
+              <Route path="usuariosMaster" element={<UsuariosMaster />} />
+              <Route path="empresas" element={<Empresas />} />
               <Route path="usuarios" element={<Usuarios />} />
               <Route path="caixas" element={<Caixas />} />
 
@@ -107,17 +110,6 @@ function App() {
                   <div className="p-6">
                     <h1 className="text-2xl font-bold text-gray-900">
                       Relatórios - Em desenvolvimento
-                    </h1>
-                  </div>
-                }
-              />
-              <Route path="empresas" element={<Empresas />} />
-              <Route
-                path="usuarios"
-                element={
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                      Usuários - Em desenvolvimento
                     </h1>
                   </div>
                 }
