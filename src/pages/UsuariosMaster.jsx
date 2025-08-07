@@ -15,8 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { empresaService, usuarioService } from "../services/api";
-import UsuarioModal from "../components/UsuarioMasterModal";
+import { empresaService, usuarioMasterService } from "../services/api";
+import UsuarioMasterModal from "../components/UsuarioMasterModal";
 import toast from "react-hot-toast";
 
 const UsuariosMaster = () => {
@@ -64,7 +64,7 @@ const UsuariosMaster = () => {
             : false,
       };
       console.log("Carregando usuarios com parâmetros:", params);
-      const usuarioResponse = await usuarioService.listar(params);
+      const usuarioResponse = await usuarioMasterService.listar(params);
       console.log("Resposta do serviço de usuarios:", usuarioResponse.usuarios);
       const response = usuarioResponse.usuarios;
       console.log("Usuarios carregados:", response);
@@ -111,7 +111,7 @@ const UsuariosMaster = () => {
 
       if (usuarioEditando) {
         console.log("Atualizando usuario:", usuarioEditando.id, data);
-        const response = await usuarioService.atualizar(
+        const response = await usuarioMasterService.atualizar(
           usuarioEditando.id,
           data
         );
@@ -121,7 +121,7 @@ const UsuariosMaster = () => {
           setModalOpen(false);
         }
       } else {
-        const response = await usuarioService.criar(data);
+        const response = await usuarioMasterService.criar(data);
         if (response.success) {
           toast.success("Usuario criado com sucesso!");
           loadUsuarios();
@@ -144,7 +144,7 @@ const UsuariosMaster = () => {
       )
     ) {
       try {
-        const response = await usuarioService.deletar(usuario.id);
+        const response = await usuarioMasterService.deletar(usuario.id);
         if (response.success) {
           toast.success("Usuario excluído com sucesso!");
           loadUsuarios();
@@ -161,7 +161,7 @@ const UsuariosMaster = () => {
 
   const handleToggleStatus = async (usuario) => {
     try {
-      const response = await usuarioService.toggleStatus(usuario.id);
+      const response = await usuarioMasterService.toggleStatus(usuario.id);
       if (response.success) {
         toast.success(
           `Usuário ${usuario.ativo ? "desativado" : "ativado"} com sucesso!`
@@ -237,7 +237,9 @@ const UsuariosMaster = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Usuários (Master)
+          </h1>
           <p className="text-gray-600 mt-1">
             Gerencie seus usuarios ({totalUsuarios} total)
           </p>
@@ -480,7 +482,7 @@ const UsuariosMaster = () => {
       </div>
 
       {/* Modal */}
-      <UsuarioModal
+      <UsuarioMasterModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         usuario={usuarioEditando}

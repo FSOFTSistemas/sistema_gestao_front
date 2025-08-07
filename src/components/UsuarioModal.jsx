@@ -14,17 +14,14 @@ const schema = yup.object({
     .string()
     .email("Email inválido")
     .max(150, "Email deve ter no máximo 150 caracteres"),
-  senha: yup.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
+  senha: yup
+    .string()
+    .transform((value) => (value === "" ? undefined : value)) // trata string vazia como undefined
+    .notRequired()
+    .min(8, "Senha deve ter pelo menos 8 caracteres"),
 });
 
-const UsuarioMasterModal = ({
-  isOpen,
-  onClose,
-  usuario,
-  empresas,
-  onSave,
-  loading,
-}) => {
+const UsuarioModal = ({ isOpen, onClose, usuario, onSave, loading }) => {
   const {
     register,
     handleSubmit,
@@ -117,6 +114,7 @@ const UsuarioMasterModal = ({
                 <input
                   {...register("email")}
                   type="email"
+                  readOnly={usuario ? true : false}
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
                     errors.email ? "border-red-300" : "border-gray-300"
                   }`}
@@ -154,44 +152,6 @@ const UsuarioMasterModal = ({
                 </p>
               )}
             </div>
-            {/* Empresa */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Empresa
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Tag className="h-5 w-5 text-gray-400" />
-                </div>
-                {usuario && (
-                  <input
-                    type="hidden"
-                    value={usuario.empresa_id}
-                    {...register("empresa_id")}
-                  />
-                )}
-
-                <select
-                  {...register("empresa_id")}
-                  disabled={!!usuario}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
-                    errors.empresa_id ? "border-red-300" : "border-gray-300"
-                  } ${usuario ? "bg-gray-100 cursor-not-allowed" : ""}`}
-                >
-                  <option value="">Selecione uma empresa</option>
-                  {empresas.map((empresa) => (
-                    <option key={empresa.id} value={empresa.id}>
-                      {empresa.razao_social}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.empresa_id && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.empresa_id.message}
-                </p>
-              )}
-            </div>
 
             {/* Botões */}
             <div className="flex justify-end space-x-3 pt-4">
@@ -226,4 +186,4 @@ const UsuarioMasterModal = ({
   );
 };
 
-export default UsuarioMasterModal;
+export default UsuarioModal;
