@@ -14,9 +14,10 @@ import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
-import Usuarios from "./pages/Usuarios";
+import Usuarios from "./pages/UsuariosMaster";
 import Empresas from "./pages/Empresas";
 import "./App.css";
+import UsuariosMaster from "./pages/UsuariosMaster";
 
 function App() {
   return (
@@ -66,7 +67,7 @@ function App() {
               <Route path="clientes" element={<Clientes />} />
               <Route path="produtos" element={<Produtos />} />
               <Route path="vendas" element={<Vendas />} />
-              <Route path="usuarios" element={<Usuarios />} />
+              <Route path="usuariosMaster" element={<UsuariosMaster />} />
 
               {/* Rotas em desenvolvimento */}
               <Route

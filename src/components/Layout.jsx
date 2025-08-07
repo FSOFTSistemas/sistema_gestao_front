@@ -14,10 +14,9 @@ import {
   Menu,
   X,
   User,
-  UserSquareIcon,
-  User2,
   UserCog,
   Building,
+  UserRoundPen,
 } from "lucide-react";
 
 const Layout = () => {
@@ -33,8 +32,9 @@ const Layout = () => {
     { name: "Vendas", href: "/vendas", icon: ShoppingCart },
     { name: "Estoque", href: "/estoque", icon: FileText },
     { name: "Financeiro", href: "/financeiro", icon: CreditCard },
-    { name: "empresas", href: "/empresas", icon: Building },
-    { name: "usuarios", href: "/usuarios", icon: UserCog },
+    { name: "Empresas", href: "/empresas", icon: Building },
+    { name: "Usuários (Master)", href: "/usuariosMaster", icon: UserCog },
+    { name: "Usuários", href: "/usuarios", icon: UserRoundPen },
   ];
 
   const handleLogout = async () => {
@@ -119,7 +119,8 @@ const Layout = () => {
               .filter((item) => {
                 // Oculta "empresas" e "usuarios" para quem não é admin (id !== 1)
                 if (
-                  (item.name === "empresas" || item.name === "usuarios") &&
+                  (item.name === "Empresas" ||
+                    item.name === "Usuários (Master)") &&
                   user?.id !== 1
                 ) {
                   return false;

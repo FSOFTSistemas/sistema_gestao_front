@@ -211,7 +211,7 @@ export const vendaService = {
 // Serviços de usuários
 export const usuarioService = {
   listar: async (params) => {
-    const response = await api.get("/usuarios", { params });
+    const response = await api.get("/master/usuarios", { params });
     return response.data;
   },
 
@@ -221,22 +221,22 @@ export const usuarioService = {
   },
 
   criar: async (data) => {
-    const response = await api.post("/usuarios", data);
+    const response = await api.post("/master/usuarios", data);
     return response.data;
   },
 
   atualizar: async (id, data) => {
-    const response = await api.put(`/usuarios/${id}`, data);
+    const response = await api.put(`/master/usuarios/${id}`, data);
     return response.data;
   },
 
   deletar: async (id) => {
-    const response = await api.delete(`/usuarios/${id}`);
+    const response = await api.delete(`/master/usuarios/${id}`);
     return response.data;
   },
 
   toggleStatus: async (id) => {
-    const response = await api.patch(`/usuarios/${id}/toggle-status`);
+    const response = await api.patch(`/master/usuarios/${id}/toggle-status`);
     return response.data;
   },
 };
