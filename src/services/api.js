@@ -244,7 +244,7 @@ export const usuarioService = {
 // Serviços de empresas
 export const empresaService = {
   listar: async (params) => {
-    const response = await api.get("/empresas", { params });
+    const response = await api.get("/master/empresas", { params });
     return response.data;
   },
 
@@ -254,22 +254,22 @@ export const empresaService = {
   },
 
   criar: async (data) => {
-    const response = await api.post("/empresas", data);
+    const response = await api.post("/master/empresas", data);
     return response.data;
   },
 
   atualizar: async (id, data) => {
-    const response = await api.put(`/empresas/${id}`, data);
+    const response = await api.put(`/master/empresas/${id}`, data);
     return response.data;
   },
 
   deletar: async (id) => {
-    const response = await api.delete(`/empresas/${id}`);
+    const response = await api.delete(`/master/empresas/${id}`);
     return response.data;
   },
 
   toggleStatus: async (id) => {
-    const response = await api.patch(`/empresas/${id}/toggle-status`);
+    const response = await api.patch(`/master/empresas/${id}/toggle-status`);
     return response.data;
   },
 };

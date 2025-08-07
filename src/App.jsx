@@ -67,7 +67,6 @@ function App() {
               <Route path="produtos" element={<Produtos />} />
               <Route path="vendas" element={<Vendas />} />
               <Route path="usuarios" element={<Usuarios />} />
-              <Route path="empresas" element={<Empresas />} />
 
               {/* Rotas em desenvolvimento */}
               <Route
@@ -110,16 +109,7 @@ function App() {
                   </div>
                 }
               />
-              <Route
-                path="empresas"
-                element={
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                      Empresas - Em desenvolvimento
-                    </h1>
-                  </div>
-                }
-              />
+              <Route path="empresas" element={<Empresas />} />
               <Route
                 path="usuarios"
                 element={
