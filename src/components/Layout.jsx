@@ -17,6 +17,7 @@ import {
   UserCog,
   Building,
   Wallet,
+  UserRoundPen,
 } from "lucide-react";
 
 const Layout = () => {
