@@ -18,6 +18,7 @@ import {
   User2,
   UserCog,
   Building,
+  Wallet,
 } from "lucide-react";
 
 const Layout = () => {
@@ -31,6 +32,7 @@ const Layout = () => {
     { name: "Clientes", href: "/clientes", icon: Users },
     { name: "Produtos", href: "/produtos", icon: Package },
     { name: "Vendas", href: "/vendas", icon: ShoppingCart },
+    { name: "Caixa", href: "/caixas", icon: Wallet },
     { name: "Estoque", href: "/estoque", icon: FileText },
     { name: "Financeiro", href: "/financeiro", icon: CreditCard },
     { name: "empresas", href: "/empresas", icon: Building },

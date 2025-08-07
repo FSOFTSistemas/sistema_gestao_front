@@ -16,6 +16,7 @@ import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
 import Usuarios from "./pages/Usuarios";
 import Empresas from "./pages/Empresas";
+import Caixas from "./pages/Caixas";
 import "./App.css";
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
               <Route path="produtos" element={<Produtos />} />
               <Route path="vendas" element={<Vendas />} />
               <Route path="usuarios" element={<Usuarios />} />
+              <Route path="caixas" element={<Caixas />} />
 
               {/* Rotas em desenvolvimento */}
               <Route
