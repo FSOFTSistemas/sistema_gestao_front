@@ -13,6 +13,9 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  Lock,
+  PlusCircle,
+  MinusCircle,
 } from "lucide-react";
 import {
   PieChart,
@@ -22,6 +25,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { caixaService } from "@/services/api";
 
 // Componente principal do Caixa Web
 const CaixaWeb = () => {
@@ -48,6 +52,8 @@ const CaixaWeb = () => {
   const [observacoes, setObservacoes] = useState("");
   const [valorMovimento, setValorMovimento] = useState("");
   const [descricaoMovimento, setDescricaoMovimento] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [valorFinal, setValorFinal] = useState("");
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -63,46 +69,17 @@ const CaixaWeb = () => {
   const loadCaixaData = async () => {
     setIsLoading(true);
     try {
-      // Simular chamada da API
-      const response = await fetch("/api/caixa/aberto");
-      if (response.ok) {
-        const data = await response.json();
-        setCaixa(data);
-        setFluxos(data.fluxos || []);
+      const caixaResponse = await caixaService.buscarDiaAtual();
+      if (caixaResponse) {
+        setCaixa(caixaResponse);
+
+        setFluxos(caixaResponse.fluxos || []);
       } else {
         setCaixa(null);
         setFluxos([]);
       }
     } catch (error) {
       console.error("Erro ao carregar dados do caixa:", error);
-      // Dados de exemplo para demonstração
-      const exemploData = {
-        id: 1,
-        descricao: "Caixa do dia",
-        valor_inicial: 100.0,
-        data_abertura: new Date().toISOString(),
-        status: "aberto",
-        fluxos: [
-          {
-            id: 1,
-            descricao: "Venda - PIX",
-            valor: 50.0,
-            tipo: "entrada",
-            data: new Date().toISOString(),
-            movimento: { descricao: "PIX" },
-          },
-          {
-            id: 2,
-            descricao: "Venda - Dinheiro",
-            valor: 30.0,
-            tipo: "entrada",
-            data: new Date().toISOString(),
-            movimento: { descricao: "Dinheiro" },
-          },
-        ],
-      };
-      setCaixa(exemploData);
-      setFluxos(exemploData.fluxos);
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +87,11 @@ const CaixaWeb = () => {
 
   const calculateValues = () => {
     if (!fluxos.length) {
-      setSaldoAtual(caixa?.valor_inicial || 0);
+      setSaldoAtual(
+        caixa && typeof caixa.valor_inicial === "number"
+          ? caixa.valor_inicial.toFixed(2)
+          : 0
+      );
       setTotalEntradas(0);
       setTotalSaidas(0);
       return;
@@ -122,6 +103,7 @@ const CaixaWeb = () => {
     fluxos.forEach((fluxo) => {
       const valor = parseFloat(fluxo.valor);
       if (fluxo.tipo === "entrada" || fluxo.tipo === "abertura") {
+        console.log("Entrada:", valor);
         entradas += valor;
       } else if (fluxo.tipo === "saida" || fluxo.tipo === "cancelamento") {
         saidas += valor;
@@ -130,7 +112,7 @@ const CaixaWeb = () => {
 
     setTotalEntradas(entradas);
     setTotalSaidas(saidas);
-    setSaldoAtual((caixa?.valor_inicial || 0) + entradas - saidas);
+    setSaldoAtual(entradas - saidas);
   };
 
   const generateChartData = () => {
@@ -198,56 +180,88 @@ const CaixaWeb = () => {
       return;
     }
 
+    const valor = parseFloat(valorInicial.replace(",", "."));
+    if (isNaN(valor) || valor < 0) {
+      alert("Erro", "Digite um valor inicial válido");
+      return;
+    }
+
     try {
-      // Simular chamada da API
-      const novoFluxo = {
-        id: Date.now(),
-        descricao: "Abertura do caixa",
-        valor: parseFloat(valorInicial.replace(",", ".")),
-        tipo: "abertura",
-        data: new Date().toISOString(),
-        movimento: { descricao: "Abertura" },
+      const caixaData = {
+        descricao: descricao.trim(),
+        valor_inicial: valor,
+        observacoes: observacoes.trim() || null,
       };
-
-      const novoCaixa = {
-        id: Date.now(),
-        descricao: "Caixa do dia",
-        valor_inicial: parseFloat(valorInicial.replace(",", ".")),
-        data_abertura: new Date().toISOString(),
-        status: "aberto",
-        observacoes,
-      };
-
-      setCaixa(novoCaixa);
-      setFluxos([novoFluxo]);
-      setShowAbrirModal(false);
-      setValorInicial("");
-      setObservacoes("");
+      const response = await caixaService.abrir(caixaData);
+      if (response) {
+        setValorInicial("");
+        setDescricao("");
+        setObservacoes("");
+        alert("Caixa aberto com sucesso");
+        setShowAbrirModal(false);
+        loadCaixaData();
+      }
     } catch (error) {
       console.error("Erro ao abrir caixa:", error);
       alert("Erro ao abrir caixa");
     }
   };
 
+  const diferenca = valorFinal
+    ? parseFloat(valorFinal.replace(",", ".")) - saldoAtual
+    : 0;
+
   const handleFecharCaixa = async () => {
-    if (!caixa || caixa.status !== "aberto") {
-      alert("Não há caixa aberto para fechar");
+    if (!valorFinal.trim()) {
+      alert("Erro, digite o valor final do caixa");
       return;
     }
 
-    try {
-      const caixaAtualizado = {
-        ...caixa,
-        status: "fechado",
-        data_fechamento: new Date().toISOString(),
-        valor_final: saldoAtual,
-      };
+    const valor = parseFloat(valorFinal.replace(",", "."));
+    if (isNaN(valor) || valor < 0) {
+      alert("Erro", "Digite um valor final válido");
+      return;
+    }
 
-      setCaixa(caixaAtualizado);
-      setShowFecharModal(false);
+    // Confirmar fechamento se houver diferença
+    if (Math.abs(diferenca) > 0.01) {
+      const diferencaText = diferenca > 0 ? "sobra" : "falta";
+      const confirmMessage = `Há uma ${diferencaText} de ${formatCurrency(
+        Math.abs(diferenca)
+      )}. Deseja continuar?`;
+
+      if (window.confirm(confirmMessage)) {
+        executarFechamento(valor);
+      }
+      // Se cancelar, não faz nada
+    } else {
+      executarFechamento(valor);
+    }
+  };
+
+  const executarFechamento = async (valorFinal) => {
+    setIsLoading(true);
+
+    try {
+      // Atualizar caixa
+      const fecharData = {
+        valor_final: valorFinal,
+        observacoes: observacoes.trim() || null,
+        status: "fechado",
+      };
+      const response = await caixaService.atualizar(caixa.id, fecharData);
+      if (response) {
+        setValorFinal("");
+        setObservacoes("");
+        alert("Sucesso!", "Caixa fechado com sucesso");
+        loadCaixaData();
+        setShowFecharModal(false);
+      }
     } catch (error) {
       console.error("Erro ao fechar caixa:", error);
-      alert("Erro ao fechar caixa");
+      alert("Erro", error.response?.data?.message || "Erro ao fechar caixa");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -256,21 +270,28 @@ const CaixaWeb = () => {
       alert("Informe o valor do suprimento");
       return;
     }
+    if (!descricaoMovimento.trim()) {
+      alert("Informe a descrição do suprimento");
+      return;
+    }
 
     try {
-      const novoFluxo = {
-        id: Date.now(),
-        descricao: descricaoMovimento || "Suprimento",
-        valor: parseFloat(valorMovimento.replace(",", ".")),
+      const caixaResponse = await caixaService.buscarDiaAtual();
+      const caixaId = caixaResponse?.id;
+      const fluxoData = {
+        descricao: descricaoMovimento.trim(),
+        valor: valorMovimento,
         tipo: "entrada",
-        data: new Date().toISOString(),
-        movimento: { descricao: "Suprimento" },
+        caixa_id: caixaId,
+        movimento_id: 5,
       };
-
-      setFluxos([...fluxos, novoFluxo]);
-      setShowSuprimentoModal(false);
-      setValorMovimento("");
-      setDescricaoMovimento("");
+      const fluxoResponse = await caixaService.criarFluxo(fluxoData);
+      if (fluxoResponse) {
+        setFluxos([...fluxos, fluxoResponse]);
+        setShowSuprimentoModal(false);
+        setValorMovimento("");
+        setDescricaoMovimento("");
+      }
     } catch (error) {
       console.error("Erro ao fazer suprimento:", error);
       alert("Erro ao fazer suprimento");
@@ -283,20 +304,28 @@ const CaixaWeb = () => {
       return;
     }
 
-    try {
-      const novoFluxo = {
-        id: Date.now(),
-        descricao: descricaoMovimento || "Sangria",
-        valor: parseFloat(valorMovimento.replace(",", ".")),
-        tipo: "saida",
-        data: new Date().toISOString(),
-        movimento: { descricao: "Sangria" },
-      };
+    if (!descricaoMovimento.trim()) {
+      alert("Informe a descrição da sangria");
+      return;
+    }
 
-      setFluxos([...fluxos, novoFluxo]);
-      setShowSangriaModal(false);
-      setValorMovimento("");
-      setDescricaoMovimento("");
+    try {
+      const caixaResponse = await caixaService.buscarDiaAtual();
+      const caixaId = caixaResponse?.id;
+      const fluxoData = {
+        descricao: descricaoMovimento.trim(),
+        valor: valorMovimento,
+        tipo: "saida",
+        caixa_id: caixaId,
+        movimento_id: 6,
+      };
+      const fluxoResponse = await caixaService.criarFluxo(fluxoData);
+      if (fluxoResponse) {
+        setFluxos([...fluxos, fluxoResponse]);
+        setShowSangriaModal(false);
+        setValorMovimento("");
+        setDescricaoMovimento("");
+      }
     } catch (error) {
       console.error("Erro ao fazer sangria:", error);
       alert("Erro ao fazer sangria");
@@ -472,23 +501,23 @@ const CaixaWeb = () => {
             <>
               <button
                 onClick={() => setShowSuprimentoModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                <Plus className="w-5 h-5" />
+                <PlusCircle className="w-5 h-5" />
                 Suprimento
               </button>
               <button
                 onClick={() => setShowSangriaModal(true)}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                <Minus className="w-5 h-5" />
+                <MinusCircle className="w-5 h-5" />
                 Sangria
               </button>
               <button
                 onClick={() => setShowFecharModal(true)}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                <Square className="w-5 h-5" />
+                <XCircle className="w-5 h-5" />
                 Fechar Caixa
               </button>
             </>
@@ -584,7 +613,19 @@ const CaixaWeb = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Valor Inicial
+                  Descrição *
+                </label>
+                <input
+                  type="text"
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Caixa de João... Caixa da manhã..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Valor Inicial *
                 </label>
                 <input
                   type="text"
@@ -628,21 +669,95 @@ const CaixaWeb = () => {
       {showFecharModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <Lock className="w-6 h-6 text-red-500 inline-block mr-2" />
               Fechar Caixa
             </h3>
+            <p className="text-gray-500 mb-2">
+              informe o valor final para fechamento
+            </p>
+
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Saldo Final</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(saldoAtual)}
-                </p>
+                <div className="flex flex-row justify-between border-gray-300">
+                  <p className="text-gray-500">Saldo Inicial</p>
+                  <p className="text-gray">
+                    {formatCurrency(caixa.valor_inicial)}
+                  </p>
+                </div>
+                <div className="flex flex-row justify-between mt-2 pt-2  border-gray-300">
+                  <p className="text-gray-500">Saldo Sistema</p>
+                  <p className="text-gray">{formatCurrency(saldoAtual)}</p>
+                </div>
+                {valorFinal && (
+                  <>
+                    <div className="flex flex-row justify-between mt-2 pt-2 border-t border-gray-300">
+                      <span className="text-gray-500">Diferença:</span>
+                      <span
+                        className={`font-bold ${
+                          diferenca === 0
+                            ? "text-green-500"
+                            : diferenca > 0
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {diferenca === 0
+                          ? "Sem diferença"
+                          : diferenca > 0
+                          ? `+${formatCurrency(diferenca)}`
+                          : formatCurrency(diferenca)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
+              {/* Valor Final */}
+              <div className="mb-4">
+                <label
+                  htmlFor="valorFinal"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Valor Final *
+                </label>
+                <input
+                  id="valorFinal"
+                  type="text"
+                  placeholder="0,00"
+                  value={valorFinal}
+                  onChange={(e) => setValorFinal(e.target.value)}
+                  disabled={isLoading}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  aria-disabled={isLoading}
+                />
+              </div>
+
+              {/* Observações */}
+              <div className="mb-4">
+                <label
+                  htmlFor="observacoes"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Observações
+                </label>
+                <textarea
+                  id="observacoes"
+                  rows={4}
+                  placeholder="Observações sobre o fechamento (opcional)"
+                  value={observacoes}
+                  onChange={(e) => setObservacoes(e.target.value)}
+                  disabled={isLoading}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none h-24"
+                  aria-disabled={isLoading}
+                />
+              </div>
+
               <p className="text-sm text-gray-600">
                 Tem certeza que deseja fechar o caixa? Esta ação não pode ser
                 desfeita.
               </p>
             </div>
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowFecharModal(false)}
@@ -666,9 +781,25 @@ const CaixaWeb = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <PlusCircle className="w-6 h-6 text-yellow-500 inline-block mr-2" />
               Suprimento
             </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Adicionar dinheiro ao caixa
+            </p>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Descrição*
+                </label>
+                <input
+                  type="text"
+                  value={descricaoMovimento}
+                  onChange={(e) => setDescricaoMovimento(e.target.value)}
+                  placeholder="Descrição do suprimento"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Valor
@@ -678,18 +809,6 @@ const CaixaWeb = () => {
                   value={valorMovimento}
                   onChange={(e) => setValorMovimento(e.target.value)}
                   placeholder="0,00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descrição (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={descricaoMovimento}
-                  onChange={(e) => setDescricaoMovimento(e.target.value)}
-                  placeholder="Descrição do suprimento"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -703,9 +822,9 @@ const CaixaWeb = () => {
               </button>
               <button
                 onClick={handleSuprimento}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Confirmar
+                Registrar
               </button>
             </div>
           </div>
@@ -717,9 +836,25 @@ const CaixaWeb = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <MinusCircle className="w-6 h-6 text-blue-500 inline-block mr-2" />
               Sangria
             </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Retirar dinheiro do caixa
+            </p>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Descrição *
+                </label>
+                <input
+                  type="text"
+                  value={descricaoMovimento}
+                  onChange={(e) => setDescricaoMovimento(e.target.value)}
+                  placeholder="Descrição da sangria"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Valor
@@ -729,18 +864,6 @@ const CaixaWeb = () => {
                   value={valorMovimento}
                   onChange={(e) => setValorMovimento(e.target.value)}
                   placeholder="0,00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descrição (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={descricaoMovimento}
-                  onChange={(e) => setDescricaoMovimento(e.target.value)}
-                  placeholder="Descrição da sangria"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
@@ -754,7 +877,7 @@ const CaixaWeb = () => {
               </button>
               <button
                 onClick={handleSangria}
-                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 Confirmar
               </button>

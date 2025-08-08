@@ -308,46 +308,65 @@ export const empresaService = {
 
 // Serviços de caixa
 export const caixaService = {
-  listar: async (params) => {
-    const response = await api.get("/caixas", { params });
+  buscarDiaAtual: async () => {
+    const response = await api.get("/caixa/aberto");
     return response.data;
   },
 
-  buscarPorId: async (id) => {
-    const response = await api.get(`/caixas/${id}`);
-    return response.data;
-  },
-
-  criar: async (data) => {
-    const response = await api.post("/caixas", data);
+  abrir: async (data) => {
+    const response = await api.post("/caixa", data);
     return response.data;
   },
 
   atualizar: async (id, data) => {
-    const response = await api.put(`/caixas/${id}`, data);
+    const response = await api.put(`/caixa/${id}`, data);
     return response.data;
   },
 
-  deletar: async (id) => {
-    const response = await api.delete(`/caixas/${id}`);
+  criarFluxo: async (data) => {
+    const response = await api.post("/caixa/fluxo", data);
     return response.data;
   },
 
-  abrir: async (id, data = {}) => {
-    const response = await api.post(`/caixas/${id}/abrir`, data);
-    return response.data;
-  },
+  // listar: async (params) => {
+  //   const response = await api.get("/caixas", { params });
+  //   return response.data;
+  // },
 
-  fechar: async (id, data = {}) => {
-    const response = await api.post(`/caixas/${id}/fechar`, data);
-    return response.data;
-  },
+  // buscarPorId: async (id) => {
+  //   const response = await api.get(`/caixas/${id}`);
+  //   return response.data;
+  // },
 
-  relatorio: async (filtro = {}) => {
-    const response = await api.get("/caixas/relatorio", { params: filtro });
-    return response.data;
-  },
+  // criar: async (data) => {
+  //   const response = await api.post("/caixas", data);
+  //   return response.data;
+  // },
+
+  // atualizar: async (id, data) => {
+  //   const response = await api.put(`/caixas/${id}`, data);
+  //   return response.data;
+  // },
+
+  // deletar: async (id) => {
+  //   const response = await api.delete(`/caixas/${id}`);
+  //   return response.data;
+  // },
+
+  // abrir: async (id, data = {}) => {
+  //   const response = await api.post(`/caixas/${id}/abrir`, data);
+  //   return response.data;
+  // },
+
+  // fechar: async (id, data = {}) => {
+  //   const response = await api.post(`/caixas/${id}/fechar`, data);
+  //   return response.data;
+  // },
+
+  // relatorio: async (filtro = {}) => {
+  //   const response = await api.get("/caixas/relatorio", { params: filtro });
+  //   return response.data;
+  // },
 };
-
 
 export default api;
