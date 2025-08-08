@@ -328,45 +328,15 @@ export const caixaService = {
     return response.data;
   },
 
-  // listar: async (params) => {
-  //   const response = await api.get("/caixas", { params });
-  //   return response.data;
-  // },
+  resumoGeral: async () => {
+    const response = await api.get("/caixa/fluxo/relatorioGeral");
+    return response.data;
+  },
 
-  // buscarPorId: async (id) => {
-  //   const response = await api.get(`/caixas/${id}`);
-  //   return response.data;
-  // },
-
-  // criar: async (data) => {
-  //   const response = await api.post("/caixas", data);
-  //   return response.data;
-  // },
-
-  // atualizar: async (id, data) => {
-  //   const response = await api.put(`/caixas/${id}`, data);
-  //   return response.data;
-  // },
-
-  // deletar: async (id) => {
-  //   const response = await api.delete(`/caixas/${id}`);
-  //   return response.data;
-  // },
-
-  // abrir: async (id, data = {}) => {
-  //   const response = await api.post(`/caixas/${id}/abrir`, data);
-  //   return response.data;
-  // },
-
-  // fechar: async (id, data = {}) => {
-  //   const response = await api.post(`/caixas/${id}/fechar`, data);
-  //   return response.data;
-  // },
-
-  // relatorio: async (filtro = {}) => {
-  //   const response = await api.get("/caixas/relatorio", { params: filtro });
-  //   return response.data;
-  // },
+  buscarTodosFluxos: async () => {
+    const response = await api.get("/caixa/fluxo/todos");
+    return response.data;
+  },
 };
 
 export default api;
