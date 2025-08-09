@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // Configuração base da API
-const API_BASE_URL = "https://gestao-api.dev.br:6000/api/v1'";
+const API_BASE_URL = "https://gestao-api.dev.br:5501/api/v1'";
 
 // Criar instância do axios
 const api = axios.create({
