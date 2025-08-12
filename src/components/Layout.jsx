@@ -18,6 +18,8 @@ import {
   Building,
   Wallet,
   UserRoundPen,
+  BanknoteArrowUpIcon,
+  BanknoteArrowDownIcon,
 } from "lucide-react";
 
 const Layout = () => {
@@ -37,6 +39,16 @@ const Layout = () => {
     { name: "Empresas", href: "/empresas", icon: Building },
     { name: "Usuários (Master)", href: "/usuariosMaster", icon: UserCog },
     { name: "Usuários", href: "/usuarios", icon: UserRoundPen },
+    {
+      name: "Contas a Receber",
+      href: "/contasReceber",
+      icon: BanknoteArrowUpIcon,
+    },
+    {
+      name: "Contas a Pagar",
+      href: "/contasPagar",
+      icon: BanknoteArrowDownIcon,
+    },
   ];
 
   const handleLogout = async () => {

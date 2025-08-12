@@ -64,7 +64,6 @@ const Vendas = () => {
         data_inicio: filtroDataInicio,
         data_fim: dataFimFinal ? dataFimFinal.toISOString() : undefined,
       });
-      console.log(response);
       setVendas(response);
       calcularEstatisticas(response);
     } catch {
@@ -135,23 +134,18 @@ const Vendas = () => {
         });
 
         const caixaResponse = await caixaService.buscarDiaAtual();
-        console.log("caixa response: ", caixaResponse);
         const caixaId = caixaResponse.id;
-        console.log("caixaId: ", caixaId);
         if (caixaId) {
           const movimentosResponse = await caixaService.listarMovimentos({
             categoria: "cancelamento",
           });
-          console.log("movimentosResponse: ", movimentosResponse);
           for (const forma of venda.VendaFormas) {
             const formaPagamentoKey = forma.forma_pagamento
               ? gerarFormaPagamentoKey(forma.forma_pagamento.descricao)
               : "";
-            console.log("formaPagamentoKey: ", formaPagamentoKey);
             const movimentoCancelamento = movimentosResponse.movimentos.find(
               (m) => m.descricao === `cancelamento-${formaPagamentoKey}`
             );
-            console.log("movimentoCancelamento: ", movimentoCancelamento);
 
             if (movimentoCancelamento) {
               const fluxoData = {
