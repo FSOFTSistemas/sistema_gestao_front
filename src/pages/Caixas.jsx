@@ -106,7 +106,6 @@ const CaixaWeb = () => {
     fluxos.forEach((fluxo) => {
       const valor = parseFloat(fluxo.valor);
       if (fluxo.tipo === "entrada" || fluxo.tipo === "abertura") {
-        console.log("Entrada:", valor);
         entradas += valor;
       } else if (fluxo.tipo === "saida" || fluxo.tipo === "cancelamento") {
         saidas += valor;

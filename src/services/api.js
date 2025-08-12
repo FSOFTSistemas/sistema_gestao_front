@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // Configuração base da API
-const API_BASE_URL = "https://gestao-api.dev.br:5501/api/v1'";
+const API_BASE_URL = "https://gestao-api.dev.br:5501/api/v1";
 
 // Criar instância do axios
 const api = axios.create({
@@ -206,6 +206,11 @@ export const vendaService = {
     const response = await api.get("/vendas/resumo/forma-pagamento");
     return response.data;
   },
+
+  downloadPdf: async (id) => {
+    const response = await api.get(`/vendas/${id}/pdf`);
+    return response.data;
+  },
 };
 
 // Serviços de usuários
@@ -335,6 +340,16 @@ export const caixaService = {
 
   buscarTodosFluxos: async () => {
     const response = await api.get("/caixa/fluxo/todos");
+    return response.data;
+  },
+
+  listarMovimentos: async (params) => {
+    const response = await api.get(`/movimentos`, { params });
+    return response.data;
+  },
+
+  cancelarVenda: async (data) => {
+    const response = await api.post("/caixa/fluxo", data);
     return response.data;
   },
 };

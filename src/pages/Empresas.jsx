@@ -54,10 +54,8 @@ const Empresas = () => {
         limit: itemsPerPage,
         search: searchTerm || undefined,
       };
-      console.log("Carregando empresas com parâmetros:", params);
       const empresaResponse = await empresaService.listar(params);
       const response = empresaResponse.dados;
-      console.log("Empresas carregadas:", response);
 
       setEmpresas(response || []);
       setTotalPages(response.pagination?.totalPages || 1);
@@ -86,7 +84,6 @@ const Empresas = () => {
       setModalLoading(true);
 
       if (empresaEditando) {
-        console.log("Atualizando empresa:", empresaEditando.id, data);
         const response = await empresaService.atualizar(
           empresaEditando.id,
           data
@@ -400,9 +397,6 @@ const Empresas = () => {
                                 key={pageNum}
                                 onClick={() => {
                                   setCurrentPage(pageNum);
-                                  console.log(
-                                    `Mudando para a página ${pageNum}`
-                                  );
                                 }}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                   currentPage === pageNum

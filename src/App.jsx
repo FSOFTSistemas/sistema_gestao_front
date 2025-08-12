@@ -19,6 +19,7 @@ import Empresas from "./pages/Empresas";
 import Caixas from "./pages/Caixas";
 import "./App.css";
 import UsuariosMaster from "./pages/UsuariosMaster";
+import VendaDetalhes from "./components/VendaDetalhes";
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
               <Route path="empresas" element={<Empresas />} />
               <Route path="usuarios" element={<Usuarios />} />
               <Route path="caixas" element={<Caixas />} />
+              <Route path="/vendas/detalhes/:id" element={<VendaDetalhes />} />
 
               {/* Rotas em desenvolvimento */}
               <Route

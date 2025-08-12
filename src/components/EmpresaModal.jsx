@@ -124,10 +124,24 @@ const EmpresaModal = ({ isOpen, onClose, empresa, onSave, loading }) => {
                   <input
                     {...register("cnpj")}
                     type="text"
+                    maxLength={18} // 14 números + 4 caracteres da máscara
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
+                      value = value.replace(/^(\d{2})(\d)/, "$1.$2"); // 00.000
+                      value = value.replace(
+                        /^(\d{2})\.(\d{3})(\d)/,
+                        "$1.$2.$3"
+                      ); // 00.000.000
+                      value = value.replace(/\.(\d{3})(\d)/, ".$1/$2"); // 00.000.000/0000
+                      value = value.replace(/(\d{4})(\d)/, "$1-$2"); // 00.000.000/0000-00
+
+                      e.target.value = value;
+                      setValue("cnpj", value); // Atualiza o react-hook-form
+                    }}
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
                       errors.cnpj ? "border-red-300" : "border-gray-300"
                     }`}
-                    placeholder="000.000.000/0000-00"
+                    placeholder="00.000.000/0000-00"
                   />
                 </div>
                 {errors.cnpj && (

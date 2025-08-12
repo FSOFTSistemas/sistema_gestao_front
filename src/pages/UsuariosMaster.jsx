@@ -63,11 +63,8 @@ const UsuariosMaster = () => {
             ? true
             : false,
       };
-      console.log("Carregando usuarios com parâmetros:", params);
       const usuarioResponse = await usuarioMasterService.listar(params);
-      console.log("Resposta do serviço de usuarios:", usuarioResponse.usuarios);
       const response = usuarioResponse.usuarios;
-      console.log("Usuarios carregados:", response);
 
       setUsuarios(response || []);
       setTotalPages(response.pagination?.totalPages || 1);
@@ -84,7 +81,6 @@ const UsuariosMaster = () => {
     try {
       setLoading(true);
       const response = await empresaService.listar();
-      console.log("Empresas carregadas:", response.dados);
       setEmpresas(response.dados || []);
     } catch (error) {
       console.error("Erro ao carregar empresas:", error);
@@ -110,7 +106,6 @@ const UsuariosMaster = () => {
       setModalLoading(true);
 
       if (usuarioEditando) {
-        console.log("Atualizando usuario:", usuarioEditando.id, data);
         const response = await usuarioMasterService.atualizar(
           usuarioEditando.id,
           data
@@ -444,9 +439,6 @@ const UsuariosMaster = () => {
                                 key={pageNum}
                                 onClick={() => {
                                   setCurrentPage(pageNum);
-                                  console.log(
-                                    `Mudando para a página ${pageNum}`
-                                  );
                                 }}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                   currentPage === pageNum

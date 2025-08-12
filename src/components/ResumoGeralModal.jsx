@@ -41,14 +41,9 @@ const ResumoGeralModal = ({ isOpen, onClose }) => {
     try {
       // Buscar resumo geral de todos os caixas
       const resumoResponse = await caixaService.resumoGeral();
-      console.log(resumoResponse);
 
       // Buscar todos os fluxos de movimento
       const fluxosResponse = await caixaService.buscarTodosFluxos();
-      console.log(
-        "valores dos fluxos",
-        fluxosResponse.map((f) => f.valor)
-      );
 
       if (resumoResponse) {
         setResumoData({

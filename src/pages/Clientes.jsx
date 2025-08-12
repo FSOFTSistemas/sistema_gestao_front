@@ -52,9 +52,7 @@ const Clientes = () => {
             ? true
             : false,
       };
-      console.log("Carregando clientes com parâmetros:", params);
       const response = await clienteService.listar(params);
-      console.log("Clientes carregados:", response);
 
       setClientes(response.clientes || []);
       setTotalPages(response.pagination?.totalPages || 1);
@@ -83,7 +81,6 @@ const Clientes = () => {
       setModalLoading(true);
 
       if (clienteEditando) {
-        console.log("Atualizando cliente:", clienteEditando.id, data);
         const response = await clienteService.atualizar(
           clienteEditando.id,
           data
@@ -456,9 +453,6 @@ const Clientes = () => {
                                 key={pageNum}
                                 onClick={() => {
                                   setCurrentPage(pageNum);
-                                  console.log(
-                                    `Mudando para a página ${pageNum}`
-                                  );
                                 }}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                   currentPage === pageNum

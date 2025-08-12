@@ -61,11 +61,8 @@ const Usuarios = () => {
             ? true
             : false,
       };
-      console.log("Carregando usuarios com parâmetros:", params);
       const usuarioResponse = await usuarioService.listar(params);
-      console.log("Resposta do serviço de usuarios:", usuarioResponse.usuarios);
       const response = usuarioResponse.usuarios;
-      console.log("Usuarios carregados:", response);
 
       setUsuarios(response || []);
       setTotalPages(response.pagination?.totalPages || 1);
@@ -94,7 +91,6 @@ const Usuarios = () => {
       setModalLoading(true);
 
       if (usuarioEditando) {
-        console.log("Atualizando usuario:", usuarioEditando.id, data);
         const response = await usuarioService.atualizar(
           usuarioEditando.id,
           data
@@ -397,9 +393,6 @@ const Usuarios = () => {
                                 key={pageNum}
                                 onClick={() => {
                                   setCurrentPage(pageNum);
-                                  console.log(
-                                    `Mudando para a página ${pageNum}`
-                                  );
                                 }}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                   currentPage === pageNum

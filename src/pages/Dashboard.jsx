@@ -36,11 +36,6 @@ const Dashboard = () => {
       // Carregar estatísticas de clientes
       const clientesResponse = await clienteService.listar();
       const clientesRelatorio = await clienteService.relatorio(30);
-      console.log("Clientes Relatório:", clientesRelatorio);
-      console.log(
-        "Clientes Relatorio Estatísticas:",
-        clientesRelatorio.estatisticas
-      );
 
       // Carregar estatísticas de produtos
       const produtosResponse = await produtoService.listar();
