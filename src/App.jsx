@@ -20,6 +20,9 @@ import Caixas from "./pages/Caixas";
 import "./App.css";
 import UsuariosMaster from "./pages/UsuariosMaster";
 import VendaDetalhes from "./components/VendaDetalhes";
+import PDVWeb from "./pages/PDVWeb";
+import ProdutoSelectionWeb from "./components/ProdutoSelectionWeb";
+import PagamentoWeb from "./pages/PagamentoWeb";
 
 function App() {
   return (
@@ -74,18 +77,11 @@ function App() {
               <Route path="usuarios" element={<Usuarios />} />
               <Route path="caixas" element={<Caixas />} />
               <Route path="/vendas/detalhes/:id" element={<VendaDetalhes />} />
+              <Route path="/pdv" element={<PDVWeb />} />
+              <Route path="/pdv/produtos" element={<ProdutoSelectionWeb />} />
+              <Route path="/pdv/pagamento" element={<PagamentoWeb />} />
 
               {/* Rotas em desenvolvimento */}
-              <Route
-                path="vendas"
-                element={
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                      Vendas - Em desenvolvimento
-                    </h1>
-                  </div>
-                }
-              />
               <Route
                 path="estoque"
                 element={

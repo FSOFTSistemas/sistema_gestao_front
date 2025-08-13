@@ -49,6 +49,7 @@ const Layout = () => {
       href: "/contasPagar",
       icon: BanknoteArrowDownIcon,
     },
+    { name: "PDV", href: "/pdv", icon: ShoppingCart },
   ];
 
   const handleLogout = async () => {
