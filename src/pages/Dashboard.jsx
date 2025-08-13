@@ -323,13 +323,18 @@ const Dashboard = () => {
               </p>
             </div>
           </Link>
-          <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 opacity-60">
-            <ShoppingCart className="w-8 h-8 text-gray-400 mr-3" />
+          <Link
+            to="/pdv"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <ShoppingCart className="w-8 h-8 text-orange-400 mr-3" />
             <div>
               <p className="font-medium text-gray-600">Nova Venda</p>
-              <p className="text-sm text-gray-500">Em desenvolvimento</p>
+              <p className="text-sm text-gray-500">
+                Criar uma nova Venda (PDV)
+              </p>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
