@@ -30,14 +30,13 @@ const Layout = () => {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: Home },
-    { name: "Clientes", href: "/clientes", icon: Users },
-    { name: "Produtos", href: "/produtos", icon: Package },
-    { name: "Vendas", href: "/vendas", icon: ShoppingCart },
+    { name: "PDV", href: "/pdv", icon: ShoppingCart },
     { name: "Caixa", href: "/caixas", icon: Wallet },
+    { name: "Vendas", href: "/vendas", icon: ShoppingCart },
+    { name: "Produtos", href: "/produtos", icon: Package },
+    { name: "Clientes", href: "/clientes", icon: Users },
     { name: "Estoque", href: "/estoque", icon: FileText },
     { name: "Financeiro", href: "/financeiro", icon: CreditCard },
-    { name: "Empresas", href: "/empresas", icon: Building },
-    { name: "Usuários (Master)", href: "/usuariosMaster", icon: UserCog },
     { name: "Usuários", href: "/usuarios", icon: UserRoundPen },
     {
       name: "Contas a Receber",
@@ -49,7 +48,8 @@ const Layout = () => {
       href: "/contasPagar",
       icon: BanknoteArrowDownIcon,
     },
-    { name: "PDV", href: "/pdv", icon: ShoppingCart },
+    { name: "Empresas", href: "/empresas", icon: Building },
+    { name: "Usuários (Master)", href: "/usuariosMaster", icon: UserCog },
   ];
 
   const handleLogout = async () => {

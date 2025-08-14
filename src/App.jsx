@@ -23,6 +23,8 @@ import VendaDetalhes from "./components/VendaDetalhes";
 import PDVWeb from "./pages/PDVWeb";
 import ProdutoSelectionWeb from "./components/ProdutoSelectionWeb";
 import PagamentoWeb from "./pages/PagamentoWeb";
+import ContasReceber from "./pages/ContasReceber";
+import ContasPagar from "./pages/ContasPagar";
 
 function App() {
   return (
@@ -80,6 +82,8 @@ function App() {
               <Route path="/pdv" element={<PDVWeb />} />
               <Route path="/pdv/produtos" element={<ProdutoSelectionWeb />} />
               <Route path="/pdv/pagamento" element={<PagamentoWeb />} />
+              <Route path="contasReceber" element={<ContasReceber />} />
+              <Route path="contasPagar" element={<ContasPagar />} />
 
               {/* Rotas em desenvolvimento */}
               <Route

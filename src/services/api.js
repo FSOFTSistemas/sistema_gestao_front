@@ -211,6 +211,22 @@ export const vendaService = {
     const response = await api.get(`/vendas/${id}/pdf`);
     return response.data;
   },
+
+  criar: async (data) => {
+    const response = await api.post("/vendas", data);
+    return response.data;
+  },
+  deduzirEstoque: async (produtoId, quantidade) => {
+    const response = await api.post(`/produtos/deduzir-estoque/${produtoId}`, {
+      quantidade,
+    });
+    return response.data;
+  },
+
+  criarContaReceber: async (data) => {
+    const response = await api.post("/contas-receber/parcelado", data);
+    return response.data;
+  },
 };
 
 // Serviços de usuários
@@ -333,6 +349,16 @@ export const caixaService = {
     return response.data;
   },
 
+  criarFluxoVenda: async (data) => {
+    const response = await api.post("/caixa/fluxo/venda", data);
+    return response.data;
+  },
+
+  criarFluxoRecebimento: async (data) => {
+    const response = await api.post("/caixa/fluxo/recebimento", data);
+    return response.data;
+  },
+
   resumoGeral: async () => {
     const response = await api.get("/caixa/fluxo/relatorioGeral");
     return response.data;
@@ -350,6 +376,67 @@ export const caixaService = {
 
   cancelarVenda: async (data) => {
     const response = await api.post("/caixa/fluxo", data);
+    return response.data;
+  },
+};
+
+export const contasReceberService = {
+  listar: async () => {
+    const response = await api.get("/contas-receber");
+    return response.data;
+  },
+
+  pagar: async (id, data) => {
+    const response = await api.post(`/contas-receber/${id}/pagar`, data);
+    return response.data;
+  },
+};
+
+export const contasPagarService = {
+  listar: async () => {
+    const response = await api.get("/contas-pagar");
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post("/contas-pagar", data);
+    return response.data;
+  },
+
+  pagar: async (id, data) => {
+    const response = await api.post(`/contas-pagar/${id}/pagar`, data);
+    return response.data;
+  },
+};
+
+export const formasPagamentoService = {
+  listar: async () => {
+    const response = await api.get("/formas-pagamento");
+    return response.data;
+  },
+
+  buscarPorId: async (id) => {
+    const response = await api.get(`/formas-pagamento/${id}`);
+    return response.data;
+  },
+
+  criar: async (data) => {
+    const response = await api.post("/formas-pagamento", data);
+    return response.data;
+  },
+
+  atualizar: async (id, data) => {
+    const response = await api.put(`/formas-pagamento/${id}`, data);
+    return response.data;
+  },
+
+  deletar: async (id) => {
+    const response = await api.delete(`/formas-pagamento/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id) => {
+    const response = await api.patch(`/formas-pagamento/${id}/toggle-status`);
     return response.data;
   },
 };
