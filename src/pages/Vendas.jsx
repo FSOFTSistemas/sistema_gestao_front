@@ -184,7 +184,6 @@ const Vendas = () => {
       // Busca os dados completos da venda para garantir que temos todos os detalhes
       const vendaDetalhes = await vendaService.buscarPorId(id);
       const empresa = await empresaService.buscarPorId(user.empresa_id);
-      console.log(empresa);
 
       // Configura o documento PDF para 80mm de largura
       // O comprimento pode ser dinâmico. Começamos com um valor e o ajustamos.
@@ -233,7 +232,11 @@ const Vendas = () => {
       // --- Itens da Venda ---
       doc.setFont("helvetica", "bold");
       doc.text("Qtd.  Descrição", 5, y);
-      doc.text("Vl. Unit.  Vl. Total", 75, y, { align: "right" });
+      //
+      // LINHA DO CABEÇALHO CORRIGIDA
+      //
+      doc.text("Vl. Unit.", 60, y, { align: "right" }); // Coluna para Valor Unitário
+      doc.text("Vl. Total", 75, y, { align: "right" }); // Coluna para Valor Total
       y += 4;
       doc.line(5, y, 75, y); // Linha separadora
       y += 4;
@@ -241,20 +244,23 @@ const Vendas = () => {
       doc.setFont("helvetica", "normal");
       vendaDetalhes.itens.forEach((item) => {
         const nomeProduto = item.produto.nome;
-        const linhaProduto = `${item.quantidade} x ${nomeProduto}`;
+        // Ajuste a largura máxima do texto para não invadir as colunas de preço
+        const linhasTexto = doc.splitTextToSize(nomeProduto, 45); // Largura máxima do nome do produto
 
-        // Quebra de linha para nomes de produtos longos
-        const linhasTexto = doc.splitTextToSize(linhaProduto, 45); // 45mm de largura máxima
+        // Escreve a quantidade e a descrição
+        doc.text(`${item.quantidade} x `, 5, y);
+        doc.text(linhasTexto, 20, y); // Começa a descrição um pouco depois da quantidade
 
-        doc.text(linhasTexto, 5, y);
-
-        doc.text(formatCurrency(item.preco_unitario), 75, y, {
+        //
+        // LINHAS DOS ITENS CORRIGIDAS
+        //
+        doc.text(formatCurrency(item.preco_unitario), 60, y, {
           align: "right",
-        });
-        y += linhasTexto.length > 1 ? 6 : 4; // Ajusta o espaçamento se houver quebra de linha
+        }); // Valor unitário na sua coluna
+        doc.text(formatCurrency(item.subtotal), 75, y, { align: "right" }); // Valor total na sua coluna
 
-        doc.text(formatCurrency(item.subtotal), 75, y, { align: "right" });
-        y += 5;
+        // Ajusta o 'y' para a próxima linha, considerando a quebra de linha da descrição
+        y += linhasTexto.length * 4 + 2;
       });
 
       doc.line(5, y, 75, y); // Linha separadora
