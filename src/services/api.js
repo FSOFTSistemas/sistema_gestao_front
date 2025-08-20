@@ -302,7 +302,7 @@ export const empresaService = {
   },
 
   buscarPorId: async (id) => {
-    const response = await api.get(`/empresas/${id}`);
+    const response = await api.get(`/master/empresas/${id}`);
     return response.data;
   },
 

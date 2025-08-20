@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { caixaService, vendaService } from "../services/api";
+import { caixaService, empresaService, vendaService } from "../services/api";
 import toast from "react-hot-toast";
 import {
   Search,
@@ -20,10 +20,13 @@ import {
   Download,
   FileText,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Vendas = () => {
   const [vendas, setVendas] = useState([]);
   const [filtro, setFiltro] = useState("");
+  const { user } = useAuth();
   const [debouncedFiltro, setDebouncedFiltro] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todas");
   const [filtroDataInicio, setFiltroDataInicio] = useState("");
@@ -176,8 +179,145 @@ const Vendas = () => {
     }
   };
 
-  const handleReimprimirVenda = (id) => {
-    window.open(`/vendas/${id}/reimprimir`, "_blank");
+  const handleReimprimirVenda = async (id) => {
+    try {
+      // Busca os dados completos da venda para garantir que temos todos os detalhes
+      const vendaDetalhes = await vendaService.buscarPorId(id);
+      const empresa = await empresaService.buscarPorId(user.empresa_id);
+      console.log(empresa);
+
+      // Configura o documento PDF para 80mm de largura
+      // O comprimento pode ser dinâmico. Começamos com um valor e o ajustamos.
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, 200], // Largura de 80mm, altura inicial
+      });
+
+      let y = 10; // Posição vertical inicial
+
+      // --- Cabeçalho ---
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(empresa.fantasia, 40, y, { align: "center" });
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`CNPJ: ${empresa.cnpj}`, 40, y, { align: "center" });
+      y += 4;
+      doc.text(`Endereço: ${empresa.endereco}`, 40, y, { align: "center" });
+      y += 4;
+      doc.text("--------------------------------------------------", 40, y, {
+        align: "center",
+      });
+      y += 5;
+
+      // --- Detalhes da Venda ---
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text(`CUPOM NÃO FISCAL - VENDA #${vendaDetalhes.id}`, 40, y, {
+        align: "center",
+      });
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`Data: ${formatDate(vendaDetalhes.data_venda)}`, 5, y);
+      y += 4;
+      doc.text(
+        `Cliente: ${vendaDetalhes.cliente?.nome || "Não informado"}`,
+        5,
+        y
+      );
+      y += 6;
+
+      // --- Itens da Venda ---
+      doc.setFont("helvetica", "bold");
+      doc.text("Qtd.  Descrição", 5, y);
+      doc.text("Vl. Unit.  Vl. Total", 75, y, { align: "right" });
+      y += 4;
+      doc.line(5, y, 75, y); // Linha separadora
+      y += 4;
+
+      doc.setFont("helvetica", "normal");
+      vendaDetalhes.itens.forEach((item) => {
+        const nomeProduto = item.produto.nome;
+        const linhaProduto = `${item.quantidade} x ${nomeProduto}`;
+
+        // Quebra de linha para nomes de produtos longos
+        const linhasTexto = doc.splitTextToSize(linhaProduto, 45); // 45mm de largura máxima
+
+        doc.text(linhasTexto, 5, y);
+
+        doc.text(formatCurrency(item.preco_unitario), 75, y, {
+          align: "right",
+        });
+        y += linhasTexto.length > 1 ? 6 : 4; // Ajusta o espaçamento se houver quebra de linha
+
+        doc.text(formatCurrency(item.subtotal), 75, y, { align: "right" });
+        y += 5;
+      });
+
+      doc.line(5, y, 75, y); // Linha separadora
+      y += 5;
+
+      // --- Totais ---
+      doc.setFont("helvetica", "bold");
+      doc.text("Subtotal:", 5, y);
+      doc.text(formatCurrency(vendaDetalhes.total), 75, y, { align: "right" });
+      y += 5;
+
+      doc.text("Descontos:", 5, y);
+      doc.text(formatCurrency(vendaDetalhes.desconto || 0), 75, y, {
+        align: "right",
+      });
+      y += 6;
+
+      doc.setFontSize(10);
+      doc.text("TOTAL:", 5, y);
+      doc.text(
+        formatCurrency(vendaDetalhes.total - (vendaDetalhes.desconto || 0)),
+        75,
+        y,
+        {
+          align: "right",
+        }
+      );
+      y += 6;
+
+      // --- Formas de Pagamento ---
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.line(5, y, 75, y);
+      y += 5;
+      doc.setFont("helvetica", "bold");
+      doc.text("Forma(s) de Pagamento:", 5, y);
+      y += 4;
+
+      doc.setFont("helvetica", "normal");
+      vendaDetalhes.VendaFormas.forEach((forma) => {
+        const formaLabel = getFormaPagamentoLabel(
+          forma.forma_pagamento.descricao
+        );
+        doc.text(formaLabel, 5, y);
+        doc.text(formatCurrency(forma.valor), 75, y, { align: "right" });
+        y += 4;
+      });
+
+      // --- Rodapé ---
+      y += 6;
+      doc.text("--------------------------------------------------", 40, y, {
+        align: "center",
+      });
+      y += 4;
+      doc.setFontSize(7);
+      doc.text("Obrigado pela preferência!", 40, y, { align: "center" });
+
+      // Abre o PDF em uma nova guia
+      doc.output("dataurlnewwindow");
+    } catch (error) {
+      console.error("Erro ao gerar PDF da venda:", error);
+      toast.error("Não foi possível gerar a reimpressão da venda.");
+    }
   };
 
   const handleVisualizarVenda = (id) => {
@@ -547,7 +687,7 @@ const Vendas = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="relative">
+                        <div className="absolute">
                           <button
                             onClick={() =>
                               setDropdownOpen(
