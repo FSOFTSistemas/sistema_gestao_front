@@ -64,7 +64,6 @@ const Vendas = () => {
         data_inicio: filtroDataInicio,
         data_fim: dataFimFinal ? dataFimFinal.toISOString() : undefined,
       });
-      console.log("vendas", response);
       setVendas(response);
       calcularEstatisticas(response);
     } catch {

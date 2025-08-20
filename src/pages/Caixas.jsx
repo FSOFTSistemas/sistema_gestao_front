@@ -82,7 +82,9 @@ const CaixaWeb = () => {
         setFluxos([]);
       }
     } catch (error) {
-      console.error("Erro ao carregar dados do caixa:", error);
+      if (error.response?.status !== 404) {
+        console.error("Erro ao carregar dados do caixa:", error);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -49,7 +49,9 @@ export const CaixaProvider = ({ children }) => {
 
       return response && response.status === "aberto";
     } catch (error) {
-      console.error("Erro ao verificar caixa:", error);
+      if (error.response?.status !== 404) {
+        console.error("Caixa não encontrado:", error);
+      }
       setCaixaAberto(false);
       setCaixaAtual(null);
       return false;

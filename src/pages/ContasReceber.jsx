@@ -83,7 +83,6 @@ export default function ContasReceber() {
   const loadClientes = async () => {
     try {
       const response = await clienteService.listar();
-      console.log("clientes", response.clientes);
       setClientes(response.clientes);
     } catch (error) {
       console.error("Erro ao carregar clientes:", error);
