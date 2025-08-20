@@ -199,13 +199,10 @@ export default function ContasPagar() {
 
     if (filtros.fornecedor) {
       filtered = filtered.filter((conta) => {
-        console.log("conta carregada antes do filtro", conta);
-        console.log("Comparando", conta.fornecedor, "com", filtros.fornecedor);
         return conta.fornecedor
           ?.toLowerCase()
           .includes(filtros.fornecedor.toLowerCase());
       });
-      console.log(filtered);
     }
 
     // Filtro por período

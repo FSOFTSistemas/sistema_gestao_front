@@ -224,8 +224,6 @@ const PagamentoWeb = () => {
       // Salvar venda
       const response = await vendaService.criar(vendaData);
       const vendaId = response.venda.id;
-      console.log("Venda criada:", response);
-      console.log("Venda id:", vendaId);
 
       // Deduzir estoque
       await Promise.all(
