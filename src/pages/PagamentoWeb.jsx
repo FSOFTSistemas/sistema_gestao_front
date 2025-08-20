@@ -6,6 +6,7 @@ import {
   formasPagamentoService,
   clienteService,
   caixaService,
+  empresaService,
 } from "../services/api";
 import toast from "react-hot-toast";
 import {
@@ -22,10 +23,13 @@ import {
   Calendar,
   Package,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PagamentoWeb = () => {
   const navigate = useNavigate();
   const { items, total, clearItems } = usePDVContext();
+  const { user } = useAuth();
 
   const [formasPagamento, setFormasPagamento] = useState([]);
   const [pagamentosAdicionados, setPagamentosAdicionados] = useState([]);
@@ -82,6 +86,31 @@ const PagamentoWeb = () => {
     } catch (error) {
       console.error("Erro ao carregar clientes:", error);
     }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getFormaPagamentoLabel = (forma) => {
+    const formas = {
+      DINHEIRO: "Dinheiro",
+      CARTAO_CREDITO: "Cartão Crédito",
+      CARTAO_DEBITO: "Cartão Débito",
+      PIX: "PIX",
+      TRANSFERENCIA: "Transferência",
+      BOLETO: "Boleto",
+      CHEQUE: "Cheque",
+    };
+    // Se a forma já for um texto (como vindo do crediário), use-a.
+    // Senão, procure no mapeamento.
+    return formas[forma] || forma;
   };
 
   const handleSelecionarForma = (forma) => {
@@ -237,7 +266,7 @@ const PagamentoWeb = () => {
       toast.success("Venda finalizada com sucesso!");
 
       // Gerar comprovante
-      gerarComprovante();
+      gerarComprovante(vendaId);
 
       // Limpar carrinho e voltar
       clearItems();
@@ -251,21 +280,127 @@ const PagamentoWeb = () => {
     }
   };
 
-  const gerarComprovante = () => {
-    const comprovanteData = {
-      items,
-      pagamentos: pagamentosAdicionados,
-      total,
-      data: new Date().toLocaleString("pt-BR"),
-    };
+  const gerarComprovante = async (vendaId) => {
+    const empresa = await empresaService.buscarPorId(user.empresa_id);
+    // Procura se a venda foi no crediário para pegar o nome do cliente
+    const pagamentoCrediario = pagamentosAdicionados.find(
+      (pag) => pag.forma.descricao.toLowerCase() === "crediário"
+    );
+    let nomeCliente = "Não informado";
+    if (pagamentoCrediario) {
+      const clienteInfo = clientes.find(
+        (c) => c.id === parseInt(pagamentoCrediario.crediario.clienteId)
+      );
+      if (clienteInfo) {
+        nomeCliente = clienteInfo.nome;
+      }
+    }
 
-    // Aqui você pode implementar a geração do PDF ou impressão
-    console.log("Dados do comprovante:", comprovanteData);
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: [80, 250], // Largura de 80mm, altura inicial
+    });
 
-    // Simular impressão
-    setTimeout(() => {
-      toast.success("Comprovante enviado para impressão");
-    }, 1000);
+    let y = 10;
+
+    // --- Cabeçalho ---
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(empresa.fantasia, 40, y, { align: "center" });
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(`CNPJ: ${empresa.cnpj}`, 40, y, { align: "center" });
+    y += 4;
+    doc.text(`Endereço: ${empresa.endereco}`, 40, y, { align: "center" });
+    y += 4;
+    doc.text("--------------------------------------------------", 40, y, {
+      align: "center",
+    });
+    y += 5;
+
+    // --- Detalhes da Venda ---
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text(`CUPOM NÃO FISCAL - VENDA #${vendaId}`, 40, y, {
+      align: "center",
+    });
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(`Data: ${formatDate(new Date())}`, 5, y);
+    y += 4;
+    doc.text(`Cliente: ${nomeCliente}`, 5, y);
+    y += 6;
+
+    // --- Itens da Venda ---
+    doc.setFont("helvetica", "bold");
+    doc.text("Qtd.  Descrição", 5, y);
+    doc.text("Vl. Unit.", 60, y, { align: "right" });
+    doc.text("Vl. Total", 75, y, { align: "right" });
+    y += 4;
+    doc.line(5, y, 75, y);
+    y += 4;
+
+    doc.setFont("helvetica", "normal");
+    items.forEach((item) => {
+      const nomeProduto = item.nome;
+      const linhasTexto = doc.splitTextToSize(nomeProduto, 40);
+
+      doc.text(`${item.quantidade} x `, 5, y);
+      doc.text(linhasTexto, 12, y);
+
+      doc.text(formatCurrency(item.preco_unitario), 60, y, { align: "right" });
+      doc.text(formatCurrency(item.subtotal), 75, y, { align: "right" });
+
+      y += linhasTexto.length * 4 + 2;
+    });
+
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    // --- Totais ---
+    doc.setFont("helvetica", "bold");
+    doc.text("Subtotal:", 5, y);
+    doc.text(formatCurrency(total), 75, y, { align: "right" });
+    y += 5;
+
+    // (Você pode adicionar lógica de desconto aqui se necessário)
+
+    doc.setFontSize(10);
+    doc.text("TOTAL:", 5, y);
+    doc.text(formatCurrency(total), 75, y, { align: "right" });
+    y += 6;
+
+    // --- Formas de Pagamento ---
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.line(5, y, 75, y);
+    y += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Forma(s) de Pagamento:", 5, y);
+    y += 4;
+
+    doc.setFont("helvetica", "normal");
+    pagamentosAdicionados.forEach((pag) => {
+      const formaLabel = getFormaPagamentoLabel(pag.forma.descricao);
+      doc.text(formaLabel, 5, y);
+      doc.text(formatCurrency(pag.valor), 75, y, { align: "right" });
+      y += 4;
+    });
+
+    // --- Rodapé ---
+    y += 6;
+    doc.text("--------------------------------------------------", 40, y, {
+      align: "center",
+    });
+    y += 4;
+    doc.setFontSize(7);
+    doc.text("Obrigado pela preferência!", 40, y, { align: "center" });
+
+    // Abre o PDF em uma nova guia
+    doc.output("dataurlnewwindow");
   };
 
   const formatCurrency = (value) => {
