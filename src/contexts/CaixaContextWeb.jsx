@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { caixaService } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 // Contexto do Caixa
 const CaixaContext = createContext();
@@ -19,11 +20,18 @@ export const CaixaProvider = ({ children }) => {
   const [caixaAberto, setCaixaAberto] = useState(false);
   const [caixaAtual, setCaixaAtual] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   // Verificar status do caixa ao inicializar
   useEffect(() => {
-    verificarCaixa();
-  }, []);
+    if (isAuthenticated) {
+      verificarCaixa();
+    } else {
+      setCaixaAberto(false);
+      setCaixaAtual(null);
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
 
   // Verificar se há caixa aberto
   const verificarCaixa = async () => {
