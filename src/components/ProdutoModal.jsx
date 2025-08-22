@@ -11,6 +11,7 @@ import {
   Tag,
   FileText,
 } from "lucide-react";
+import GerenciadorOpcionais from "./GerenciadorOpcionais";
 
 const schema = yup.object({
   nome: yup
@@ -20,32 +21,43 @@ const schema = yup.object({
     .required("Nome é obrigatório"),
   codigo_barras: yup
     .string()
-    .max(50, "Código de barras deve ter no máximo 50 caracteres"),
+    .max(50, "Código de barras pode ter no máximo 50 caracteres")
+    .nullable(),
   preco_venda: yup
     .number()
-    .positive("Preço de venda deve ser positivo")
+    .transform((value) =>
+      isNaN(value) || value === null || value === undefined ? 0 : value
+    )
     .required("Preço de venda é obrigatório"),
   custo: yup
     .number()
-    .positive("Custo deve ser positivo")
+    .transform((value) =>
+      isNaN(value) || value === null || value === undefined ? 0 : value
+    )
     .required("Custo é obrigatório"),
-  unidade: yup
-    .string()
-    .max(10, "Unidade deve ter no máximo 10 caracteres")
-    .required("Unidade é obrigatória"),
+  unidade: yup.string().required("Unidade é obrigatória"),
+  categoria_id: yup.string().nullable(),
   estoque_atual: yup
     .number()
-    .min(0, "Estoque atual não pode ser negativo")
+    .transform((value) =>
+      isNaN(value) || value === null || value === undefined ? 0 : value
+    )
+    .min(0, "Estoque não pode ser negativo")
     .required("Estoque atual é obrigatório"),
   estoque_minimo: yup
     .number()
+    .transform((value) =>
+      isNaN(value) || value === null || value === undefined ? 0 : value
+    )
     .min(0, "Estoque mínimo não pode ser negativo")
     .required("Estoque mínimo é obrigatório"),
   descricao: yup
     .string()
-    .max(500, "Descrição deve ter no máximo 500 caracteres"),
-  ncm: yup.string().max(10, "NCM deve ter no máximo 10 caracteres"),
-  cfop: yup.string().max(4, "CFOP deve ter no máximo 4 caracteres"),
+    .max(500, "Descrição pode ter no máximo 500 caracteres")
+    .nullable(),
+  ncm: yup.string().max(10, "NCM pode ter no máximo 10 caracteres").nullable(),
+  cfop: yup.string().max(4, "CFOP pode ter no máximo 4 caracteres").nullable(),
+  montavel: yup.boolean(),
 });
 
 const ProdutoModal = ({
@@ -55,6 +67,7 @@ const ProdutoModal = ({
   onSave,
   loading,
   categorias,
+  onRefresh,
 }) => {
   const {
     register,
@@ -65,10 +78,39 @@ const ProdutoModal = ({
     watch,
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      montavel: false,
+      unidade: "UN",
+      custo: 0,
+      preco_venda: 0,
+      estoque_atual: 0,
+      estoque_minimo: 0,
+    },
   });
 
   const precoVenda = watch("preco_venda");
   const custo = watch("custo");
+  const montavel = watch("montavel");
+
+  useEffect(() => {
+    if (produto) {
+      // Garante que categoria_id seja o ID, não o objeto, e trata valores nulos
+      const initialData = {
+        ...produto,
+        categoria_id: produto.categoria?.id || "",
+      };
+      reset(initialData);
+    } else {
+      reset({
+        montavel: false,
+        unidade: "UN",
+        custo: 0,
+        preco_venda: 0,
+        estoque_atual: 0,
+        estoque_minimo: 0,
+      });
+    }
+  }, [produto, reset]);
 
   useEffect(() => {
     if (produto) {
@@ -77,7 +119,7 @@ const ProdutoModal = ({
         setValue(key, produto[key] || "");
       });
     } else {
-      reset();
+      reset({ montavel: false });
     }
   }, [produto, setValue, reset]);
 
@@ -306,6 +348,34 @@ const ProdutoModal = ({
                 )}
               </div>
             </div>
+
+            {/* NOVO: Seção para o tipo de produto (simples ou montável) */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center">
+                <input
+                  {...register("montavel")}
+                  id="montavel"
+                  type="checkbox"
+                  className="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                />
+                <label
+                  htmlFor="montavel"
+                  className="ml-3 block text-sm font-medium text-gray-900"
+                >
+                  É um produto montável? (ex: Açaí, Pizza, Combo)
+                </label>
+              </div>
+            </div>
+
+            {/* NOVO: Seção condicional para gerenciar opções */}
+            {montavel && produto?.id && (
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="text-sm font-medium text-gray-900 mb-4">
+                  Gerenciar Opções de Montagem
+                </h4>
+                <GerenciadorOpcionais produto={produto} onRefresh={onRefresh} />
+              </div>
+            )}
 
             {/* Estoque */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePDVContext } from "../contexts/PDVContextWeb";
-import { produtoService } from "../services/api";
+import { produtoService, grupoOpcionalService } from "../services/api";
 import toast from "react-hot-toast";
 import {
   Search,
@@ -14,6 +14,7 @@ import {
   Filter,
   X,
 } from "lucide-react";
+import ModalDeMontagem from "../components/ModalDeMontagem";
 
 const ProdutoSelectionWeb = () => {
   const navigate = useNavigate();
@@ -30,6 +31,11 @@ const ProdutoSelectionWeb = () => {
   const [categoriaFilter, setCategoriaFilter] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  const [modalMontagemOpen, setModalMontagemOpen] = useState(false);
+  const [produtoParaMontar, setProdutoParaMontar] = useState(null);
+  const [opcionaisProduto, setOpcionaisProduto] = useState([]);
+  const [loadingOpcionais, setLoadingOpcionais] = useState(false);
 
   useEffect(() => {
     loadProdutos();
@@ -90,11 +96,29 @@ const ProdutoSelectionWeb = () => {
     setFilteredProdutos(filtered);
   };
 
-  const handleSelectProduct = (produto) => {
-    setSelectedProduct(produto);
-    setQuantidade(1);
-    setPrecoUnitario(produto.preco_venda.toString());
-    setShowModal(true);
+  const handleSelectProduct = async (produto) => {
+    if (produto.montavel) {
+      // Se for montável, busca os opcionais e abre o modal de montagem
+      setLoadingOpcionais(true);
+      setProdutoParaMontar(produto);
+      setModalMontagemOpen(true);
+      try {
+        const response = await grupoOpcionalService.listarPorProduto(
+          produto.id
+        );
+        setOpcionaisProduto(response || []);
+      } catch {
+        toast.error("Erro ao buscar opções do produto.");
+      } finally {
+        setLoadingOpcionais(false);
+      }
+    } else {
+      // Se for simples, segue o fluxo antigo
+      setSelectedProduct(produto);
+      setQuantidade(1);
+      setPrecoUnitario(produto.preco_venda.toString());
+      setShowModal(true);
+    }
   };
 
   const handleAddProduct = () => {
@@ -106,6 +130,13 @@ const ProdutoSelectionWeb = () => {
     addItem(selectedProduct, quantidade, parseFloat(precoUnitario));
     setShowModal(false);
     toast.success("Produto adicionado ao carrinho");
+    navigate("/pdv");
+  };
+
+  const handleConfirmarMontagem = (pacoteItemMontado) => {
+    addItem(pacoteItemMontado);
+    setModalMontagemOpen(false);
+    toast.success("Item personalizado adicionado ao carrinho");
     navigate("/pdv");
   };
 
@@ -400,6 +431,16 @@ const ProdutoSelectionWeb = () => {
             </div>
           </div>
         </div>
+      )}
+      {modalMontagemOpen && produtoParaMontar && (
+        <ModalDeMontagem
+          isOpen={modalMontagemOpen}
+          onClose={() => setModalMontagemOpen(false)}
+          produto={produtoParaMontar}
+          grupos={opcionaisProduto}
+          loading={loadingOpcionais}
+          onConfirm={handleConfirmarMontagem}
+        />
       )}
     </div>
   );

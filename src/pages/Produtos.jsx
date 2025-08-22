@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Plus,
   Search,
@@ -49,6 +49,21 @@ const Produtos = () => {
     filtroCategoria,
     filtroEstoqueBaixo,
   ]);
+
+  const handleRefreshProdutoEditando = useCallback(async () => {
+    if (!produtoEditando?.id) return;
+
+    try {
+      // Usamos o buscarPorId do seu service para pegar os dados mais recentes
+      const response = await produtoService.buscarPorId(produtoEditando.id);
+      if (response) {
+        setProdutoEditando(response); // Atualiza o estado com o produto fresco
+      }
+    } catch (error) {
+      console.error("Erro ao recarregar produto:", error);
+      toast.error("Não foi possível atualizar os dados do produto.");
+    }
+  }, [produtoEditando?.id]); // A função só será recriada se o ID do produto mudar
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -584,6 +599,7 @@ const Produtos = () => {
         onSave={handleSaveProduto}
         loading={modalLoading}
         categorias={categorias}
+        onRefresh={handleRefreshProdutoEditando}
       />
 
       {/* Overlay para fechar dropdown */}

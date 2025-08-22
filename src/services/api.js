@@ -175,6 +175,56 @@ export const produtoService = {
   },
 };
 
+// Serviços de Grupos de Opcionais
+export const grupoOpcionalService = {
+  // Lista todos os grupos de um produto específico
+  listarPorProduto: async (produtoId) => {
+    const response = await api.get(
+      `/grupos-opcionais/por-produto/${produtoId}`
+    );
+    return response.data;
+  },
+
+  // Cria um novo grupo de opcionais
+  criar: async (data) => {
+    const response = await api.post("/grupos-opcionais", data);
+    return response.data;
+  },
+
+  // Atualiza um grupo de opcionais existente
+  atualizar: async (id, data) => {
+    const response = await api.put(`/grupos-opcionais/${id}`, data);
+    return response.data;
+  },
+
+  // Deleta um grupo de opcionais
+  deletar: async (id) => {
+    const response = await api.delete(`/grupos-opcionais/${id}`);
+    return response.data;
+  },
+};
+
+// Serviços de Itens Opcionais
+export const itemOpcionalService = {
+  // Cria um novo item opcional dentro de um grupo
+  criar: async (data) => {
+    const response = await api.post("/itens-opcionais", data);
+    return response.data;
+  },
+
+  // Atualiza um item opcional existente
+  atualizar: async (id, data) => {
+    const response = await api.put(`/itens-opcionais/${id}`, data);
+    return response.data;
+  },
+
+  // Deleta um item opcional
+  deletar: async (id) => {
+    const response = await api.delete(`/itens-opcionais/${id}`);
+    return response.data;
+  },
+};
+
 // Serviços de vendas
 export const vendaService = {
   listar: async (params) => {

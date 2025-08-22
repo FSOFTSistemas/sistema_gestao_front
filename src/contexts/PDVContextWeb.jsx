@@ -13,20 +13,16 @@ export const usePDVContext = () => {
 
 // Provider do contexto
 export const PDVProvider = ({ children }) => {
-  const [items, setItems] = useState([]);
-
-  // Carregar itens do localStorage ao inicializar
-  useEffect(() => {
-    const savedItems = localStorage.getItem("pdv_items");
-    if (savedItems) {
-      try {
-        setItems(JSON.parse(savedItems));
-      } catch (error) {
-        console.error("Erro ao carregar itens do localStorage:", error);
-        localStorage.removeItem("pdv_items");
-      }
+  const [items, setItems] = useState(() => {
+    try {
+      const savedItems = localStorage.getItem("pdv_items");
+      return savedItems ? JSON.parse(savedItems) : [];
+    } catch (error) {
+      console.error("Erro ao carregar itens do localStorage:", error);
+      localStorage.removeItem("pdv_items");
+      return [];
     }
-  }, []);
+  });
 
   // Salvar itens no localStorage sempre que mudarem
   useEffect(() => {
@@ -37,10 +33,16 @@ export const PDVProvider = ({ children }) => {
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Adicionar item
-  const addItem = (produto, quantidade, precoUnitario) => {
-    // Verificar se o produto já existe no carrinho
+  const addItem = (itemOuProduto, quantidade, precoUnitario) => {
+    // Caso 1: Adicionando um item MONTADO (vem como um objeto único e completo)
+    if (itemOuProduto.tipo === "montado") {
+      setItems((prevItems) => [...prevItems, itemOuProduto]);
+      return; // Encerra a função aqui
+    }
+    // Caso 2: Adicionando um item SIMPLES (lógica antiga, com pequenos ajustes)
+    const produto = itemOuProduto;
     const existingItemIndex = items.findIndex(
-      (item) => item.produto_id === produto.id
+      (item) => item.produto_id === produto.id && item.tipo === "simples" // Garante que só combinamos itens simples
     );
     if (existingItemIndex >= 0) {
       // Se existe, atualizar quantidade
@@ -59,6 +61,7 @@ export const PDVProvider = ({ children }) => {
       const newItem = {
         id: `${produto.id}_${Date.now()}`,
         produto_id: produto.id,
+        tipo: "simples",
         nome: produto.nome,
         quantidade,
         preco_unitario: precoUnitario,
@@ -75,21 +78,24 @@ export const PDVProvider = ({ children }) => {
 
   // Atualizar quantidade do item
   const updateItemQuantity = (itemId, novaQuantidade) => {
-    if (novaQuantidade <= 0) {
-      removeItem(itemId);
-      return;
-    }
-
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              quantidade: novaQuantidade,
-              subtotal: novaQuantidade * item.preco_unitario,
+    setItems(
+      (prevItems) =>
+        prevItems
+          .map((item) => {
+            // Só permite alterar a quantidade de itens do tipo 'simples'
+            if (item.id === itemId && item.tipo === "simples") {
+              if (novaQuantidade <= 0) {
+                return null; // Marcar para remoção
+              }
+              return {
+                ...item,
+                quantidade: novaQuantidade,
+                subtotal: novaQuantidade * item.preco_unitario,
+              };
             }
-          : item
-      )
+            return item;
+          })
+          .filter(Boolean) // Remove os itens marcados como nulos
     );
   };
 
@@ -97,7 +103,7 @@ export const PDVProvider = ({ children }) => {
   const updateItem = (itemId, quantidade, precoUnitario) => {
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === itemId
+        item.id === itemId && item.tipo === "simples" // Também protege itens montados
           ? {
               ...item,
               quantidade,

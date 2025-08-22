@@ -209,12 +209,25 @@ const PagamentoWeb = () => {
         desconto: 0,
         status: "CONFIRMADA",
         observacoes: emitirNota ? "Nota fiscal emitida" : "Sem nota fiscal",
-        itens: items.map((item) => ({
-          produto_id: item.produto_id,
-          quantidade: item.quantidade,
-          preco_unitario: item.preco_unitario,
-          subtotal: item.subtotal,
-        })),
+        itens: items.map((item) => {
+          if (item.tipo === "montado") {
+            return {
+              produto_id: item.produto_id, // ID do produto base (Açaí)
+              quantidade: item.quantidade,
+              preco_unitario: item.preco_unitario,
+              subtotal: item.subtotal,
+              // Envia os IDs dos opcionais para o backend
+              itens_opcionais_ids: item.itens_opcionais_ids,
+            };
+          }
+          // Para itens simples, continua como antes
+          return {
+            produto_id: item.id,
+            quantidade: item.quantidade,
+            preco_unitario: item.preco_unitario,
+            subtotal: item.subtotal,
+          };
+        }),
         formas_pagamento: pagamentosAdicionados.map((pag) => ({
           forma_pagamento_id: pag.forma.id,
           valor: pag.valor,

@@ -158,40 +158,54 @@ const PDVWeb = () => {
                           <h3 className="font-medium text-gray-900">
                             {item.nome}
                           </h3>
+                          {item.tipo === "montado" &&
+                            item.opcionais?.length > 0 && (
+                              <ul className="text-xs text-gray-500 list-disc list-inside">
+                                {item.opcionais.map((op) => (
+                                  <li key={op.id}>{op.produto.nome}</li>
+                                ))}
+                              </ul>
+                            )}
                           <p className="text-sm text-gray-600">
-                            {formatCurrency(item.preco_unitario)} por unidade
+                            {formatCurrency(item.preco_unitario)}
+                            {item.tipo !== "montado" && " por unidade"}
                           </p>
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-300">
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.id,
-                                  item.quantidade - 1
-                                )
-                              }
-                              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-l-lg transition-colors"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
+                          {item.tipo !== "montado" ? (
+                            <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-300">
+                              <button
+                                onClick={() =>
+                                  handleUpdateQuantity(
+                                    item.id,
+                                    item.quantidade - 1
+                                  )
+                                }
+                                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-l-lg transition-colors"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="px-3 py-2 text-sm font-medium text-gray-900 min-w-[3rem] text-center">
+                                {item.quantidade}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleUpdateQuantity(
+                                    item.id,
+                                    item.quantidade + 1
+                                  )
+                                }
+                                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-r-lg transition-colors"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
                             <span className="px-3 py-2 text-sm font-medium text-gray-900 min-w-[3rem] text-center">
-                              {item.quantidade}
+                              {item.quantidade}x
                             </span>
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.id,
-                                  item.quantidade + 1
-                                )
-                              }
-                              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-r-lg transition-colors"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-
+                          )}
                           <div className="text-right min-w-[6rem]">
                             <p className="font-bold text-gray-900">
                               {formatCurrency(item.subtotal)}
