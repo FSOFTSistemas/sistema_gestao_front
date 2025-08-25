@@ -49,7 +49,10 @@ const ProdutoSelectionWeb = () => {
   const loadProdutos = async () => {
     try {
       setLoading(true);
-      const response = await produtoService.listar();
+      const response = await produtoService.listar({
+        ativo: true,
+        limit: Number.MAX_SAFE_INTEGER,
+      });
       const res = response.data.produtos;
       const produtosAtivos = res.filter((produto) => produto.ativo);
       setProdutos(produtosAtivos);
@@ -65,7 +68,7 @@ const ProdutoSelectionWeb = () => {
   const loadCategorias = async () => {
     try {
       const response = await produtoService.listarCategorias();
-      setCategorias(response);
+      setCategorias(response.data);
     } catch (error) {
       console.error("Erro ao carregar categorias:", error);
     }

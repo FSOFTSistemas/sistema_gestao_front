@@ -133,6 +133,7 @@ const ProdutoModal = ({
       estoque_minimo: parseInt(data.estoque_minimo),
     };
     onSave(formattedData);
+    reset();
   };
 
   const calcularMargem = () => {
